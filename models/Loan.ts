@@ -7,6 +7,7 @@ interface Loan extends Document {
   interest?: number;
   guarantor?: string;
   date: Date;
+  balance: number;
   processedBy: Schema.Types.ObjectId;
   remainingTotalUnits: number;
 }
@@ -18,6 +19,7 @@ const LoanSchema = new Schema<Loan>({
   interest: { type: Number, default: 0 },
   guarantor: { type: String, required: false },
   date: { type: Date, default: Date.now },
+  balance: { type: Number, required: false },
   processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   remainingTotalUnits: { type: Number, required: true },
 });

@@ -4,6 +4,7 @@ import { Auth } from "../handlers/auth";
 import { Unit } from "../handlers/unit";
 import { Loan } from "../handlers/loan";
 import fetchDetailsByPhone from "../handlers/userInfo";
+import { Repayment } from "../handlers/repayments";
 
 const router = express.Router();
 
@@ -46,5 +47,12 @@ router.put("/loan/:id", Loan.updateLoan);
 
 // fetch user details with phoneNumber for those who dont have smartphone or incase...
 router.get("/phone/:phoneNumber", fetchDetailsByPhone);
+
+//Repayment
+router.post("/repayment", Repayment.create);
+/*router.get("/repayments/:id", payLoan.getRepayment);
+router.put("/repayments/:id", payLoan.updateRepayment);
+router.delete("/repayments/:id", payLoan.deleteRepayment);
+router.get("/repayments", payLoan.getAllRepayments);*/
 
 export default router;
