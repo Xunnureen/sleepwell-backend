@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import UserModel, { IUser } from "../models/User";
 import UnitModel from "../models/Unit";
 import LoanModel from "../models/Loan";
+import RepaymentModel from "../models/Repayment";
 
 const fetchDetailsByPhone = async (req: Request, res: Response) => {
   const { phoneNumber } = req.params;
@@ -23,10 +24,16 @@ const fetchDetailsByPhone = async (req: Request, res: Response) => {
       unitId: { $in: units.map((unit) => unit._id) },
     });
 
+    // Find repayments by loan IDs
+    const repayments = await RepaymentModel.find({
+      loanId: { $in: loans.map((loan) => loan._id) },
+    });
+
     res.status(200).json({
       user,
       units,
       loans,
+      repayments,
     });
   } catch (err) {
     console.error("Error fetching user details:", err);
