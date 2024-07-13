@@ -5,6 +5,7 @@ import { Unit } from "../handlers/unit";
 import { Loan } from "../handlers/loan";
 import fetchDetailsByPhone from "../handlers/userInfo";
 import { Repayment } from "../handlers/repayments";
+//import authMiddleware from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
@@ -18,6 +19,9 @@ router.get("/health", (req: Request, res: Response) => {
 
 //sign in user route
 router.post("/auth", Auth.login);
+
+// Apply authMiddleware to all routes defined after this line
+//router.use(authMiddleware);
 
 //user
 router.post("/user", User.create);
@@ -50,9 +54,10 @@ router.get("/phone/:phoneNumber", fetchDetailsByPhone);
 
 //Repayment
 router.post("/repayment", Repayment.create);
-/*router.get("/repayments/:id", payLoan.getRepayment);
-router.put("/repayments/:id", payLoan.updateRepayment);
-router.delete("/repayments/:id", payLoan.deleteRepayment);
-router.get("/repayments", payLoan.getAllRepayments);*/
+router.get("/repayments/:id", Repayment.getById);
+router.get("/repayments", Repayment.getAll);
+router.put("/repayments/:id", Repayment.update);
+//for future to be enable
+//router.delete("/repayments/:id", Repayment.delete);
 
 export default router;

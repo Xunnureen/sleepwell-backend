@@ -6,9 +6,9 @@ const MIN_TOTAL_UNIT = 2000; // Define the minimum total units required
 
 export class Loan {
   static async create(req: Request, res: Response) {
-    const { unitId, amount } = req.body;
+    const { memberId, unitId, amount } = req.body;
 
-    if (!unitId || !amount) {
+    if (!memberId || !unitId || !amount) {
       return res.status(400).json({
         success: false,
         message: "Please provide required fields",
@@ -50,13 +50,13 @@ export class Loan {
       const newLoan = await LoanModel.create({
         unitId,
         amount,
-        processedBy: unitId,
+        processedBy: memberId,
         remainingTotalUnits, // Store the remaining total units in the loan document
       });
 
       return res.status(201).json({
         success: true,
-        message: "Loan created successfully",
+        message: "Loan granted and created successfully",
         data: newLoan,
       });
     } catch (error: any) {

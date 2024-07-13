@@ -1,19 +1,21 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IRepayment extends Document {
   loanId: Schema.Types.ObjectId;
   repaymentAmount: number;
+  balance: number;
   processedBy: Schema.Types.ObjectId;
-  createdDate: Date;
+  previousRemainingTotalUnits: number; // New field
+  currentRemainingTotalUnits: number; // New field
 }
 
-const repaymentSchema = new Schema<IRepayment>({
+const RepaymentSchema: Schema = new Schema({
   loanId: { type: Schema.Types.ObjectId, ref: "Loan", required: true },
   repaymentAmount: { type: Number, required: true },
+  balance: { type: Number, required: true },
   processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  createdDate: { type: Date, default: Date.now },
+  previousRemainingTotalUnits: { type: Number, required: true }, // New field
+  currentRemainingTotalUnits: { type: Number, required: true }, // New field
 });
 
-const RepaymentModel = model<IRepayment>("Repayment", repaymentSchema);
-
-export default RepaymentModel;
+export default mongoose.model<IRepayment>("Repayment", RepaymentSchema);
