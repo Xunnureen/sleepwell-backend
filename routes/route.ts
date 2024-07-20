@@ -34,18 +34,17 @@ router.delete("/user/:id", User.deleteUser);
 router.put("/user/update-password/:id", User.updateDefaultPassword);
 
 //Unit
-
 router.post("/units", Unit.create);
-router.get("/units/:id", Unit.getUnit);
+router.get("/units/:id", Unit.getSingleUnit);
 router.get("/units", Unit.getAllUnits);
-//router.put("/units/:id", Unit.updateUnit);
+//router.put("/units/:id", Unit.update);
 
 //to be enable in future for now
 //router.delete("/units/:id", Unit.deleteUnit);
 
 // Loan
 router.post("/loan", Loan.create);
-//router.get("/loan/:id", Loan.getLoan);
+router.get("/loan/:id", Loan.getSingleLoan);
 router.get("/loans", Loan.getAllLoans);
 router.put("/loan/:id", Loan.updateLoan);
 

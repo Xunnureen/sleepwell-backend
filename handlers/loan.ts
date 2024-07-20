@@ -94,7 +94,6 @@ export class Loan {
   }
 
   // get all units
-
   static async getAllLoans(req: Request, res: Response) {
     try {
       const loans = await LoanModel.find()
