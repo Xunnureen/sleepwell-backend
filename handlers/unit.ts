@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import UnitModel from "../models/Unit";
+import UserModel, { IUser } from "../models/User";
 import moment from "moment";
 
 const PER_UNIT = 2500;
@@ -64,20 +65,16 @@ export class Unit {
     }
   }
 
-  // get signle units
-  static async getUnit(req: Request, res: Response) {
+  static async getSingleUnit(req: Request, res: Response) {
     const { id } = req.params;
-
     try {
       const unit = await UnitModel.findById(id).populate("memberId");
-
       if (!unit) {
         return res.status(404).json({
           success: false,
           message: "Unit not found",
         });
       }
-
       return res.status(200).json({
         success: true,
         message: "Unit fetched successfully",
@@ -92,6 +89,7 @@ export class Unit {
     }
   }
 
+  // get all units
   static async getAllUnits(req: Request, res: Response) {
     try {
       const units = await UnitModel.find().populate("processedBy");

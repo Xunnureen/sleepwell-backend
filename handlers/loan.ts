@@ -93,6 +93,29 @@ export class Loan {
     }
   }
 
+  static async singleLoan(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const loan = await LoanModel.findById(id);
+      if (!loan) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Loan not found" });
+      }
+      return res.status(200).json({
+        success: true,
+        message: "Single loan data fetched successfully",
+        data: loan,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: "Error retrieving single loan",
+        error: error.message,
+      });
+    }
+  }
+
   // get all units
   static async getAllLoans(req: Request, res: Response) {
     try {
@@ -115,7 +138,7 @@ export class Loan {
       });
     }
   }
-
+  // update loan
   static async updateLoan(req: Request, res: Response) {
     const { id } = req.params;
     const { amount } = req.body;
