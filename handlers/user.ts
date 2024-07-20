@@ -60,7 +60,10 @@ export class User {
   static async singleUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const singleUser = await UserModel.findById(id);
+      const singleUser = await UserModel.findById(id).populate(
+        "createdBy",
+        "fullName"
+      );
 
       if (!singleUser) {
         return res
@@ -85,8 +88,12 @@ export class User {
   // Get all users
   static async getAllUsers(req: Request, res: Response) {
     try {
-      const allUsers = await UserModel.find({});
+      const allUsers = await UserModel.find({}).populate(
+        "createdBy",
+        "fullName"
+      );
       const Length = await UserModel.countDocuments();
+
       if (allUsers.length === 0) {
         return res
           .status(400)

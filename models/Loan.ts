@@ -1,30 +1,26 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-// Define the Loan interface
-interface Loan extends Document {
+export interface ILoan extends Document {
   unitId: Schema.Types.ObjectId;
+  memberId: Schema.Types.ObjectId;
   amount: number;
-  interest?: number;
-  guarantor?: string;
-  date: Date;
-  balance: number;
-  processedBy: Schema.Types.ObjectId;
   remainingTotalUnits: number;
+  processedBy: string;
+  previousAmount?: number;
+  updatedAmount?: number;
 }
 
-// Define the Loan schema
-const LoanSchema = new Schema<Loan>({
+const LoanSchema: Schema = new Schema({
   unitId: { type: Schema.Types.ObjectId, ref: "Unit", required: true },
+  memberId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   amount: { type: Number, required: true },
-  interest: { type: Number, default: 0 },
-  guarantor: { type: String, required: false },
-  date: { type: Date, default: Date.now },
-  balance: { type: Number, required: false },
-  processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   remainingTotalUnits: { type: Number, required: true },
+  processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  previousAmount: { type: Number },
+  updatedAmount: { type: Number },
 });
 
-// Create the Loan model
-const LoanModel = model<Loan>("Loan", LoanSchema);
+// Ensure a unique index on unitId and memberId to prevent duplicate entries
+LoanSchema.index({ unitId: 1, memberId: 1 }, { unique: true });
 
-export default LoanModel;
+export default mongoose.model<ILoan>("Loan", LoanSchema);

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import LoanModel from "../models/Loan";
 import UnitModel from "../models/Unit";
 
-const MIN_TOTAL_UNIT = 2000; // Define the minimum total units required
+const MIN_TOTAL_UNIT = 2500; // Define the minimum total units required
 
 export class Loan {
   static async create(req: Request, res: Response) {
@@ -41,70 +41,71 @@ export class Loan {
         });
       }
 
-      // Deduct the loan amount from the total units
-      const remainingTotalUnits = unit.totalUnit - amount;
-      unit.totalUnit = remainingTotalUnits;
-      await unit.save();
+      // Find existing loan for the unit and member
+      let loan = await LoanModel.findOne({ unitId, memberId });
+      let previousAmount = 0;
+      let updatedAmount = amount;
+      let status = {};
 
-      // Create the loan and include the remaining total units
-      const newLoan = await LoanModel.create({
-        unitId,
-        amount,
-        processedBy: memberId,
-        remainingTotalUnits, // Store the remaining total units in the loan document
-      });
-
-      return res.status(201).json({
-        success: true,
-        message: "Loan granted and created successfully",
-        data: newLoan,
-      });
-    } catch (error: any) {
-      console.error("Error creating loan:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    }
-  }
-
-  static async getLoan(req: Request, res: Response) {
-    const { id } = req.params;
-
-    try {
-      const loan = await LoanModel.findById(id)
-        .populate("unitId")
-        .populate("processedBy");
-
-      if (!loan) {
-        return res.status(404).json({
-          success: false,
-          message: "Loan not found",
+      if (loan) {
+        // Update the existing loan
+        previousAmount = loan.amount;
+        loan.amount += amount;
+        updatedAmount = loan.amount;
+        loan.previousAmount = previousAmount;
+        loan.updatedAmount = updatedAmount;
+        loan.remainingTotalUnits -= amount;
+        status = {
+          success: true,
+          message: "Existing loan updated successfully",
+          data: loan,
+        };
+      } else {
+        // Create a new loan
+        loan = new LoanModel({
+          unitId,
+          memberId,
+          amount,
+          processedBy: memberId,
+          remainingTotalUnits: unit.totalUnit - amount,
+          previousAmount: previousAmount,
+          updatedAmount: updatedAmount,
         });
+        status = {
+          success: true,
+          message: "Loan granted and created successfully",
+          data: loan,
+        };
       }
 
-      return res.status(200).json({
-        success: true,
-        message: "Loan fetched successfully",
-        data: loan,
-      });
+      // Deduct the loan amount from the total units
+      unit.totalUnit -= amount;
+      await unit.save();
+      await loan.save();
+
+      return res.status(201).json(status);
     } catch (error: any) {
-      console.error("Error fetching loan:", error);
+      console.error("Error creating or updating loan:", error);
       return res.status(500).json({
         success: false,
         message: "Internal server error",
       });
     }
   }
+
+  // get all units
 
   static async getAllLoans(req: Request, res: Response) {
     try {
       const loans = await LoanModel.find()
         .populate("unitId")
         .populate("processedBy");
+      const length = await LoanModel.countDocuments();
+
       return res.status(200).json({
         success: true,
         message: "Loans fetched successfully",
+        length: length,
         data: loans,
       });
     } catch (error: any) {
