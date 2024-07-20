@@ -15,43 +15,48 @@ export class Unit {
       });
     }
 
-    const currentMonthStart = moment().startOf("month").toDate();
-    const currentMonthEnd = moment().endOf("month").toDate();
+    // Convert units to a number
+    const unitsNumber = Number(units);
+
+    if (isNaN(unitsNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: "Units must be a valid number",
+      });
+    }
 
     try {
-      const existingUnit = await UnitModel.findOne({
-        memberId,
-        createdDate: { $gte: currentMonthStart, $lte: currentMonthEnd },
-      });
+      let unit = await UnitModel.findOne({ memberId });
 
-      if (existingUnit) {
-        return res.status(400).json({
-          success: false,
-          message: "You can only create a unit once per month",
+      if (unit) {
+        // Update existing unit
+        unit.units += unitsNumber;
+        unit.totalUnit += unitsNumber * PER_UNIT;
+        unit.lastUpdated = new Date();
+        await unit.save();
+        return res.status(200).json({
+          success: true,
+          message: "Units added to existing unit successfully",
+          data: unit,
+        });
+      } else {
+        // Create new unit
+        const newUnit = await UnitModel.create({
+          memberId,
+          units: unitsNumber,
+          totalUnit: unitsNumber * PER_UNIT,
+          processedBy: memberId,
+          lastUpdated: new Date(),
+          createdDate: new Date(),
+        });
+        return res.status(201).json({
+          success: true,
+          message: "Unit created successfully",
+          data: newUnit,
         });
       }
-
-      const TotalUnits = units * PER_UNIT;
-
-      const newUnit = await UnitModel.create({
-        memberId,
-        units,
-        totalUnit: TotalUnits,
-        processedBy: memberId,
-        lastUpdated: new Date(),
-        createdDate: new Date(),
-      });
-
-      const length = await UnitModel.countDocuments();
-
-      return res.status(201).json({
-        success: true,
-        message: "Unit created successfully",
-        length: length,
-        data: newUnit,
-      });
     } catch (error: any) {
-      console.error("Error creating unit:", error);
+      console.error("Error creating or updating unit:", error);
       return res.status(500).json({
         success: false,
         message: "Internal server error",
@@ -59,42 +64,7 @@ export class Unit {
     }
   }
 
-  static async updateUnit(req: Request, res: Response) {
-    const { id } = req.params;
-    const { units } = req.body;
-
-    try {
-      const unit = await UnitModel.findById(id);
-
-      if (!unit) {
-        return res.status(404).json({
-          success: false,
-          message: "Unit not found",
-        });
-      }
-
-      const totalUnit = units * PER_UNIT;
-
-      unit.units = units;
-      unit.totalUnit = totalUnit;
-      unit.lastUpdated = new Date();
-
-      await unit.save();
-
-      return res.status(200).json({
-        success: true,
-        message: "Unit updated successfully",
-        data: unit,
-      });
-    } catch (error: any) {
-      console.error("Error updating unit:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    }
-  }
-
+  // get signle units
   static async getUnit(req: Request, res: Response) {
     const { id } = req.params;
 
