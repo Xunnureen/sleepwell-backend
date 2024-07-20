@@ -25,8 +25,16 @@ export class Loan {
         });
       }
 
+      const loanAmount = parseFloat(amount);
+      if (isNaN(loanAmount)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid loan amount",
+        });
+      }
+
       // Check if the loan amount is greater than the total units
-      if (amount > unit.totalUnit) {
+      if (loanAmount > unit.totalUnit) {
         return res.status(400).json({
           success: false,
           message: `Loan amount cannot be greater than total units`,
@@ -44,17 +52,17 @@ export class Loan {
       // Find existing loan for the unit and member
       let loan = await LoanModel.findOne({ unitId, memberId });
       let previousAmount = 0;
-      let updatedAmount = amount;
+      let updatedAmount = loanAmount;
       let status = {};
 
       if (loan) {
         // Update the existing loan
         previousAmount = loan.amount;
-        loan.amount += amount;
+        loan.amount += loanAmount;
         updatedAmount = loan.amount;
         loan.previousAmount = previousAmount;
         loan.updatedAmount = updatedAmount;
-        loan.remainingTotalUnits -= amount;
+        loan.remainingTotalUnits -= loanAmount;
         status = {
           success: true,
           message: "Existing loan updated successfully",
@@ -65,9 +73,9 @@ export class Loan {
         loan = new LoanModel({
           unitId,
           memberId,
-          amount,
+          amount: loanAmount,
           processedBy: memberId,
-          remainingTotalUnits: unit.totalUnit - amount,
+          remainingTotalUnits: unit.totalUnit - loanAmount,
           previousAmount: previousAmount,
           updatedAmount: updatedAmount,
         });
@@ -79,7 +87,7 @@ export class Loan {
       }
 
       // Deduct the loan amount from the total units
-      unit.totalUnit -= amount;
+      unit.totalUnit -= loanAmount;
       await unit.save();
       await loan.save();
 
