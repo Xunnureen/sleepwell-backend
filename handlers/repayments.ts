@@ -15,7 +15,7 @@ export class Repayment {
     }
 
     try {
-      // check if loanId exists
+      // Check if loanId exists
       const loan = await LoanModel.findById(loanId);
       if (!loan) {
         return res.status(404).json({
@@ -24,7 +24,7 @@ export class Repayment {
         });
       }
 
-      // check if memberId has units
+      // Check if memberId has units
       const unit = await UnitModel.findOne({ memberId });
       if (!unit) {
         return res.status(404).json({
@@ -33,9 +33,18 @@ export class Repayment {
         });
       }
 
+      // Parse totalRepayment to ensure it's treated as a number
+      const repaymentAmt = parseFloat(totalRepayment);
+      if (isNaN(repaymentAmt)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid repayment amount",
+        });
+      }
+
       // Calculate the new balance of the loan
-      const remainingBalance = loan.amount - totalRepayment;
-      if (remainingBalance < 0) {
+      const newRemainingBalance = loan.amount - repaymentAmt;
+      if (newRemainingBalance < 0) {
         return res.status(400).json({
           success: false,
           message: "Repayment amount exceeds loan balance",
@@ -43,12 +52,12 @@ export class Repayment {
       }
 
       // Update the loan balance and remaining total units
-      loan.amount = remainingBalance;
-      loan.remainingTotalUnits += totalRepayment; // Corrected from -= to += for repayment
+      loan.amount = newRemainingBalance;
+      loan.remainingTotalUnits += repaymentAmt; // Corrected from -= to += for repayment
       await loan.save();
 
       // Update the total units
-      unit.totalUnit += totalRepayment;
+      unit.totalUnit += repaymentAmt;
       await unit.save();
 
       // Find existing repayment for the loan and member
@@ -58,39 +67,48 @@ export class Repayment {
       });
 
       if (repayment) {
-        // Update the existing repayment
-        repayment.totalRepayement += totalRepayment;
-        repayment.balance = remainingBalance;
-        repayment.previousRemainingTotalUnits =
-          repayment.currentRemainingTotalUnits;
-        repayment.currentRemainingTotalUnits = loan.remainingTotalUnits;
+        // Check if the loan balance is zero
+        if (newRemainingBalance === 0) {
+          // Reset totalRepayment to zero if the loan balance is zero
+          repayment.totalRepayment = 0;
+          repayment.balance = 0;
+        } else {
+          // Update the existing repayment
+          repayment.totalRepayment += repaymentAmt;
+          repayment.balance = newRemainingBalance;
+          repayment.previousRemainingTotalUnits =
+            repayment.currentRemainingTotalUnits;
+        }
+        repayment.currentRemainingTotalUnits = unit.totalUnit; // Ensure currentRemainingTotalUnits reflects unit.totalUnit
         await repayment.save(); // Save updated repayment
+
         return res.status(200).json({
           success: true,
           message: "Repayment updated successfully",
           data: {
             repayment,
-            remainingBalance,
+            remainingBalance: repayment.balance,
             updatedTotalUnits: unit.totalUnit,
+            processedBy: memberId,
           },
         });
       } else {
         // Create a new repayment
         repayment = await RepaymentModel.create({
           loanId,
-          totalRepayment,
-          balance: remainingBalance,
+          totalRepayment: newRemainingBalance === 0 ? 0 : repaymentAmt, // Reset totalRepayment for new loan
+          balance: newRemainingBalance === 0 ? 0 : newRemainingBalance, // Ensure balance is set to 0 if fully repaid
           processedBy: memberId,
-          previousRemainingTotalUnits:
-            loan.remainingTotalUnits - totalRepayment,
-          currentRemainingTotalUnits: loan.remainingTotalUnits,
+          previousRemainingTotalUnits: unit.totalUnit - repaymentAmt,
+          currentRemainingTotalUnits: unit.totalUnit, // Ensure currentRemainingTotalUnits reflects unit.totalUnit
         });
+
         return res.status(201).json({
           success: true,
           message: "Repayment created successfully",
           data: {
             repayment,
-            remainingBalance,
+            remainingBalance: repayment.balance,
             updatedTotalUnits: unit.totalUnit,
           },
         });
@@ -196,7 +214,7 @@ export class Repayment {
       unit.totalUnit += totalRepayment;
       await unit.save();
 
-      repayment.totalRepayement += totalRepayment;
+      repayment.totalRepayment += totalRepayment;
       repayment.balance = remainingBalance;
       repayment.previousRemainingTotalUnits =
         repayment.currentRemainingTotalUnits;

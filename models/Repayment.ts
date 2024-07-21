@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IRepayment extends Document {
   loanId: Schema.Types.ObjectId;
-  totalRepayement: number;
+  totalRepayment: number;
   balance: number;
   processedBy: Schema.Types.ObjectId;
   previousRemainingTotalUnits: number; // New field
