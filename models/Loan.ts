@@ -8,6 +8,7 @@ export interface ILoan extends Document {
   processedBy: string;
   previousAmount?: number;
   updatedAmount?: number;
+  totalLoan: number; // New field to track total loan taken
 }
 
 const LoanSchema: Schema = new Schema({
@@ -18,6 +19,7 @@ const LoanSchema: Schema = new Schema({
   processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   previousAmount: { type: Number },
   updatedAmount: { type: Number },
+  totalLoan: { type: Number, default: 0 }, // Initialize totalLoan to 0
 });
 
 // Ensure a unique index on unitId and memberId to prevent duplicate entries
