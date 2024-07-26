@@ -5,9 +5,9 @@ import UnitModel from "../models/Unit";
 
 export class Repayment {
   static async create(req: Request, res: Response) {
-    const { memberId, loanId, totalRepayment } = req.body;
+    const { memberId, loanId, repaymentAmount } = req.body;
 
-    if (!loanId || !totalRepayment || !memberId) {
+    if (!loanId || !repaymentAmount || !memberId) {
       return res.status(400).json({
         success: false,
         message: "Please provide required fields",
@@ -33,8 +33,8 @@ export class Repayment {
         });
       }
 
-      // Parse totalRepayment to ensure it's treated as a number
-      const repaymentAmt = parseFloat(totalRepayment);
+      // Parse repaymentAmount to ensure it's treated as a number
+      const repaymentAmt = parseFloat(repaymentAmount);
       if (isNaN(repaymentAmt)) {
         return res.status(400).json({
           success: false,
@@ -69,17 +69,18 @@ export class Repayment {
       if (repayment) {
         // Check if the loan balance is zero
         if (newRemainingBalance === 0) {
-          // Reset totalRepayment to zero if the loan balance is zero
-          repayment.totalRepayment = 0;
+          // Reset repaymentAmount to zero if the loan balance is zero
+          repayment.repaymentAmount = 0;
           repayment.balance = 0;
         } else {
           // Update the existing repayment
-          repayment.totalRepayment += repaymentAmt;
+          repayment.repaymentAmount += repaymentAmt;
           repayment.balance = newRemainingBalance;
           repayment.previousRemainingTotalUnits =
             repayment.currentRemainingTotalUnits;
         }
         repayment.currentRemainingTotalUnits = unit.totalUnit; // Ensure currentRemainingTotalUnits reflects unit.totalUnit
+        repayment.totalRepayment += repaymentAmt; // Increment totalRepayment
         await repayment.save(); // Save updated repayment
 
         return res.status(200).json({
@@ -96,11 +97,13 @@ export class Repayment {
         // Create a new repayment
         repayment = await RepaymentModel.create({
           loanId,
-          totalRepayment: newRemainingBalance === 0 ? 0 : repaymentAmt, // Reset totalRepayment for new loan
+          memberId, // Ensure memberId is set
+          repaymentAmount: newRemainingBalance === 0 ? 0 : repaymentAmt, // Reset repaymentAmount for new loan
           balance: newRemainingBalance === 0 ? 0 : newRemainingBalance, // Ensure balance is set to 0 if fully repaid
           processedBy: memberId,
           previousRemainingTotalUnits: unit.totalUnit - repaymentAmt,
           currentRemainingTotalUnits: unit.totalUnit, // Ensure currentRemainingTotalUnits reflects unit.totalUnit
+          totalRepayment: repaymentAmt, // Initialize totalRepayment
         });
 
         return res.status(201).json({
@@ -127,7 +130,7 @@ export class Repayment {
     const { id } = req.params;
 
     try {
-      const repayment = await RepaymentModel.findById(id);
+      const repayment = await RepaymentModel.findById(id).populate("memberId");
       if (!repayment) {
         return res.status(404).json({
           success: false,
@@ -148,10 +151,10 @@ export class Repayment {
     }
   }
 
-  // get all repayment
+  // get all repayments
   static async getAll(req: Request, res: Response) {
     try {
-      const repayments = await RepaymentModel.find();
+      const repayments = await RepaymentModel.find().populate("memberId");
       return res.status(200).json({
         success: true,
         data: repayments,
@@ -168,12 +171,12 @@ export class Repayment {
   // Update a specific repayment by ID
   static async update(req: Request, res: Response) {
     const { id } = req.params;
-    const { totalRepayment } = req.body;
+    const { repaymentAmount } = req.body;
 
-    if (!totalRepayment) {
+    if (!repaymentAmount) {
       return res.status(400).json({
         success: false,
-        message: "Please provide the totalRepayment amount",
+        message: "Please provide the repayment amount",
       });
     }
 
@@ -198,7 +201,7 @@ export class Repayment {
         });
       }
 
-      const remainingBalance = loan.amount - totalRepayment;
+      const remainingBalance = loan.amount - repaymentAmount;
       if (remainingBalance < 0) {
         return res.status(400).json({
           success: false,
@@ -208,17 +211,18 @@ export class Repayment {
 
       // Update loan and unit
       loan.amount = remainingBalance;
-      loan.remainingTotalUnits += totalRepayment;
+      loan.remainingTotalUnits += repaymentAmount;
       await loan.save();
 
-      unit.totalUnit += totalRepayment;
+      unit.totalUnit += repaymentAmount;
       await unit.save();
 
-      repayment.totalRepayment += totalRepayment;
+      repayment.repaymentAmount += repaymentAmount;
       repayment.balance = remainingBalance;
       repayment.previousRemainingTotalUnits =
         repayment.currentRemainingTotalUnits;
       repayment.currentRemainingTotalUnits = loan.remainingTotalUnits;
+      repayment.totalRepayment += repaymentAmount; // Increment totalRepayment
       await repayment.save();
 
       return res.status(200).json({
@@ -248,7 +252,7 @@ export class Repayment {
       if (!deleteReypayment) {
         return res
           .status(404)
-          .json({ success: false, message: "User not found" });
+          .json({ success: false, message: "Repayment not found" });
       }
 
       return res.status(200).json({

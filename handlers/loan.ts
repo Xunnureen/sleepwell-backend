@@ -53,6 +53,7 @@ export class Loan {
       let loan = await LoanModel.findOne({ unitId, memberId });
       let previousAmount = 0;
       let updatedAmount = loanAmount;
+      let totalLoan = loanAmount; // Initialize totalLoan with the new loan amount
       let status = {};
 
       if (loan) {
@@ -62,7 +63,9 @@ export class Loan {
         updatedAmount = loan.amount;
         loan.previousAmount = previousAmount;
         loan.updatedAmount = updatedAmount;
-        loan.remainingTotalUnits -= loanAmount;
+        loan.remainingTotalUnits = unit.totalUnit - loanAmount;
+        loan.totalLoan += loanAmount; // Increment totalLoan by the new loan amount
+        totalLoan = loan.totalLoan; // Update totalLoan for the response
         status = {
           success: true,
           message: "Existing loan updated successfully",
@@ -78,6 +81,7 @@ export class Loan {
           remainingTotalUnits: unit.totalUnit - loanAmount,
           previousAmount: previousAmount,
           updatedAmount: updatedAmount,
+          totalLoan: loanAmount, // Set totalLoan to the new loan amount
         });
         status = {
           success: true,
@@ -146,6 +150,7 @@ export class Loan {
       });
     }
   }
+
   // update loan
   static async updateLoan(req: Request, res: Response) {
     const { id } = req.params;
@@ -161,8 +166,18 @@ export class Loan {
         });
       }
 
-      loan.amount = amount !== undefined ? amount : loan.amount;
+      const loanAmount = parseFloat(amount);
+      if (isNaN(loanAmount)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid loan amount",
+        });
+      }
 
+      loan.previousAmount = loan.amount;
+      loan.amount = amount !== undefined ? loanAmount : loan.amount;
+      loan.updatedAmount = loan.amount;
+      loan.totalLoan += loanAmount; // Increment totalLoan by the new loan amount
       await loan.save();
 
       return res.status(200).json({

@@ -54,9 +54,9 @@ router.get("/phone/:phoneNumber", fetchDetailsByPhone);
 
 //Repayment
 router.post("/repayment", Repayment.create);
-router.get("/repayments/:id", Repayment.getById);
+router.get("/repayment/:id", Repayment.getById);
 router.get("/repayments", Repayment.getAll);
-router.put("/repayments/:id", Repayment.update);
+router.put("/repayment/:id", Repayment.update);
 //for future to be enable
 //router.delete("/repayments/:id", Repayment.delete);
 
