@@ -51,21 +51,15 @@ export class Loan {
 
       // Find existing loan for the unit and member
       let loan = await LoanModel.findOne({ unitId, memberId });
-      let previousAmount = 0;
-      let updatedAmount = loanAmount;
-      let totalLoan = loanAmount; // Initialize totalLoan with the new loan amount
       let status = {};
 
       if (loan) {
-        // Update the existing loan
-        previousAmount = loan.amount;
-        loan.amount += loanAmount;
-        updatedAmount = loan.amount;
-        loan.previousAmount = previousAmount;
-        loan.updatedAmount = updatedAmount;
-        loan.remainingTotalUnits = unit.totalUnit - loanAmount;
+        // Update the existing loan without incrementing the amount
+        loan.previousAmount = loan.amount;
+        loan.amount = loanAmount; // Set the loan amount to the new amount
+        loan.updatedAmount = loan.amount;
+        loan.remainingTotalUnits = unit.totalUnit - loan.amount;
         loan.totalLoan += loanAmount; // Increment totalLoan by the new loan amount
-        totalLoan = loan.totalLoan; // Update totalLoan for the response
         status = {
           success: true,
           message: "Existing loan updated successfully",
@@ -79,8 +73,8 @@ export class Loan {
           amount: loanAmount,
           processedBy: memberId,
           remainingTotalUnits: unit.totalUnit - loanAmount,
-          previousAmount: previousAmount,
-          updatedAmount: updatedAmount,
+          previousAmount: 0,
+          updatedAmount: loanAmount,
           totalLoan: loanAmount, // Set totalLoan to the new loan amount
         });
         status = {
@@ -128,7 +122,7 @@ export class Loan {
     }
   }
 
-  // get all units
+  // get all loans
   static async getAllLoans(req: Request, res: Response) {
     try {
       const loans = await LoanModel.find()
@@ -175,7 +169,7 @@ export class Loan {
       }
 
       loan.previousAmount = loan.amount;
-      loan.amount = amount !== undefined ? loanAmount : loan.amount;
+      loan.amount = loanAmount; // Set the loan amount to the new amount
       loan.updatedAmount = loan.amount;
       loan.totalLoan += loanAmount; // Increment totalLoan by the new loan amount
       await loan.save();
