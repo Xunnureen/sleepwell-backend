@@ -11,16 +11,21 @@ export interface ILoan extends Document {
   totalLoan: number; // New field to track total loan taken
 }
 
-const LoanSchema: Schema = new Schema({
-  unitId: { type: Schema.Types.ObjectId, ref: "Unit", required: true },
-  memberId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  amount: { type: Number, required: true },
-  remainingTotalUnits: { type: Number, required: true },
-  processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  previousAmount: { type: Number },
-  updatedAmount: { type: Number },
-  totalLoan: { type: Number, default: 0 }, // Initialize totalLoan to 0
-});
+const LoanSchema: Schema = new Schema(
+  {
+    unitId: { type: Schema.Types.ObjectId, ref: "Unit", required: true },
+    memberId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    amount: { type: Number, required: true },
+    remainingTotalUnits: { type: Number, required: true },
+    processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    previousAmount: { type: Number },
+    updatedAmount: { type: Number },
+    totalLoan: { type: Number, default: 0 }, // Initialize totalLoan to 0
+  },
+  {
+    timestamps: true, // Automatically add createdAt and updatedAt fields
+  }
+);
 
 // Ensure a unique index on unitId and memberId to prevent duplicate entries
 LoanSchema.index({ unitId: 1, memberId: 1 }, { unique: true });
