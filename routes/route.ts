@@ -5,6 +5,7 @@ import { Unit } from "../handlers/unit";
 import { Loan } from "../handlers/loan";
 import fetchDetailsByPhone from "../handlers/userInfo";
 import { Repayment } from "../handlers/repayments";
+import { AnalyticsController } from "../handlers/analytics";
 //import authMiddleware from "../middlewares/authMiddleware";
 
 const router = express.Router();
@@ -59,5 +60,11 @@ router.get("/repayments", Repayment.getAll);
 router.put("/repayment/:id", Repayment.update);
 //for future to be enable
 //router.delete("/repayments/:id", Repayment.delete);
+
+//Analytics
+router.get("/analytic/units", AnalyticsController.getUnitsAnalytics);
+router.get("/analytics/income", AnalyticsController.getIncomeAnalytics);
+router.get("/analytics/loans", AnalyticsController.getLoansAnalytics);
+router.get("/analytics/repayments", AnalyticsController.getRepaymentsAnalytics);
 
 export default router;

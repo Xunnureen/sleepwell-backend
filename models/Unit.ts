@@ -4,19 +4,22 @@ interface Unit extends Document {
   memberId: Schema.Types.ObjectId;
   units: number;
   totalUnit: number;
-  createdDate: Date;
-  lastUpdated: Date;
+  income: number;
   processedBy: Schema.Types.ObjectId;
 }
 
-const UnitSchema = new Schema<Unit>({
-  memberId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  units: { type: Number, required: true },
-  totalUnit: { type: Number, required: true },
-  createdDate: { type: Date, default: Date.now },
-  lastUpdated: { type: Date, default: Date.now },
-  processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-});
+const UnitSchema = new Schema<Unit>(
+  {
+    memberId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    units: { type: Number, required: true },
+    totalUnit: { type: Number, required: true },
+    income: { type: Number, default: 0 },
+    processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  },
+  {
+    timestamps: true, // Automatically add createdAt and updatedAt fields
+  }
+);
 
 const UnitModel = model<Unit>("Unit", UnitSchema);
 

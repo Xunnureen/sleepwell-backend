@@ -33,7 +33,7 @@ export class Unit {
         // Update existing unit
         unit.units += unitsNumber;
         unit.totalUnit += unitsNumber * PER_UNIT;
-        unit.lastUpdated = new Date();
+        unit.income += unitsNumber * PER_UNIT; // Increment income
         await unit.save();
 
         // Update remainingTotalUnits for related loans
@@ -54,9 +54,8 @@ export class Unit {
           memberId,
           units: unitsNumber,
           totalUnit: unitsNumber * PER_UNIT,
+          income: unitsNumber * PER_UNIT, // Initialize income
           processedBy: memberId,
-          lastUpdated: new Date(),
-          createdDate: new Date(),
         });
         return res.status(201).json({
           success: true,
