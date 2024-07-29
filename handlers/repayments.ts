@@ -209,7 +209,7 @@ export class Repayment {
         });
       }
 
-      // Update loan and unit
+      // Update loan and units
       loan.amount = remainingBalance;
       loan.remainingTotalUnits += repaymentAmount;
       await loan.save();
