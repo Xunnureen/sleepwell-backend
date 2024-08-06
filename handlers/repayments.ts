@@ -34,7 +34,7 @@ export class Repayment {
       }
 
       // Parse repaymentAmount to ensure it's treated as a number
-      const repaymentAmt = parseFloat(repaymentAmount);
+      const repaymentAmt = parseInt(repaymentAmount);
       if (isNaN(repaymentAmt)) {
         return res.status(400).json({
           success: false,
@@ -43,7 +43,7 @@ export class Repayment {
       }
 
       // Calculate the new balance of the loan
-      const newRemainingBalance = loan.amount - repaymentAmt;
+      const newRemainingBalance = loan.loanTaken - repaymentAmt;
       if (newRemainingBalance < 0) {
         return res.status(400).json({
           success: false,
@@ -52,7 +52,7 @@ export class Repayment {
       }
 
       // Update the loan balance and remaining total units
-      loan.amount = newRemainingBalance;
+      loan.loanTaken = newRemainingBalance;
       loan.remainingTotalUnits += repaymentAmt; // Corrected from -= to += for repayment
       await loan.save();
 
@@ -201,7 +201,7 @@ export class Repayment {
         });
       }
 
-      const remainingBalance = loan.amount - repaymentAmount;
+      const remainingBalance = loan.loanTaken - repaymentAmount;
       if (remainingBalance < 0) {
         return res.status(400).json({
           success: false,
@@ -210,7 +210,7 @@ export class Repayment {
       }
 
       // Update loan and units
-      loan.amount = remainingBalance;
+      loan.loanTaken = remainingBalance;
       loan.remainingTotalUnits += repaymentAmount;
       await loan.save();
 

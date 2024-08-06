@@ -25,7 +25,7 @@ export class Loan {
         });
       }
 
-      const loanAmount = parseFloat(amount);
+      const loanAmount = parseInt(amount);
       if (isNaN(loanAmount)) {
         return res.status(400).json({
           success: false,
@@ -55,9 +55,8 @@ export class Loan {
 
       if (loan) {
         // Update the existing loan without incrementing the amount
-        loan.previousAmount = loan.amount;
         loan.amount = loanAmount; // Set the loan amount to the new amount
-        loan.updatedAmount = loan.amount;
+        loan.loanTaken += loanAmount; // Increment loanTaken by the new loan amount
         loan.remainingTotalUnits = unit.totalUnit - loan.amount;
         loan.totalLoan += loanAmount; // Increment totalLoan by the new loan amount
         status = {
@@ -73,8 +72,7 @@ export class Loan {
           amount: loanAmount,
           processedBy: memberId,
           remainingTotalUnits: unit.totalUnit - loanAmount,
-          previousAmount: 0,
-          updatedAmount: loanAmount,
+          loanTaken: loanAmount,
           totalLoan: loanAmount, // Set totalLoan to the new loan amount
         });
         status = {
@@ -168,9 +166,8 @@ export class Loan {
         });
       }
 
-      loan.previousAmount = loan.amount;
       loan.amount = loanAmount; // Set the loan amount to the new amount
-      loan.updatedAmount = loan.amount;
+      loan.loanTaken += loanAmount;
       loan.totalLoan += loanAmount; // Increment totalLoan by the new loan amount
       await loan.save();
 
