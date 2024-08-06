@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import UnitModel from "../models/Unit";
-import UserModel, { IUser } from "../models/User";
+import LoanModel from "../models/Loan";
 import moment from "moment";
 
 const PER_UNIT = 2500;
@@ -35,6 +35,14 @@ export class Unit {
         unit.totalUnit += unitsNumber * PER_UNIT;
         unit.income += unitsNumber * PER_UNIT; // Increment income
         await unit.save();
+
+        // Update remainingTotalUnits for related loans
+        const loans = await LoanModel.find({ unitId: unit._id, memberId });
+        for (const loan of loans) {
+          loan.remainingTotalUnits = unit.totalUnit;
+          await loan.save();
+        }
+
         return res.status(200).json({
           success: true,
           message: "Units added to existing unit successfully",
