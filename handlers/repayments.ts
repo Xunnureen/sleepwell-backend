@@ -201,7 +201,7 @@ export class Repayment {
         });
       }
 
-      const remainingBalance = loan.amount - repaymentAmount;
+      const remainingBalance = loan.loanTaken - repaymentAmount;
       if (remainingBalance < 0) {
         return res.status(400).json({
           success: false,
@@ -210,7 +210,7 @@ export class Repayment {
       }
 
       // Update loan and units
-      loan.amount = remainingBalance;
+      loan.loanTaken = remainingBalance;
       loan.remainingTotalUnits += repaymentAmount;
       await loan.save();
 
