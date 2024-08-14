@@ -6,10 +6,10 @@ interface CustomRequest extends Request {
   userId?: string;
 }
 
-export const verifyToken = (
+export const authMiddleware = (
   req: CustomRequest,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   const excludedPaths = ["/api/v1/auth/login", "/api/v1/healthcheck"];
 
@@ -26,7 +26,7 @@ export const verifyToken = (
   try {
     const decodedToken = jwt.verify(
       token,
-      process.env.JWT_SECRET as string,
+      process.env.JWT_SECRET as string
     ) as { userId: string }; // Add type annotation for decodedToken
 
     req.userId = decodedToken.userId; // Add userId directly to the request object
