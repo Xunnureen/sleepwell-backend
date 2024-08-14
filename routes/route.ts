@@ -6,7 +6,7 @@ import { Loan } from "../handlers/loan";
 import fetchDetailsByPhone from "../handlers/userInfo";
 import { Repayment } from "../handlers/repayments";
 import { AnalyticsController } from "../handlers/analytics";
-//import authMiddleware from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.get("/health", (req: Request, res: Response) => {
 router.post("/auth", Auth.login);
 
 // Apply authMiddleware to all routes defined after this line
-//router.use(authMiddleware);
+router.use(authMiddleware);
 
 //user
 router.post("/user", User.create);
@@ -62,9 +62,18 @@ router.put("/repayment/:id", Repayment.update);
 //router.delete("/repayments/:id", Repayment.delete);
 
 //Analytics
-router.get("/analytic/units", AnalyticsController.getUnitsAnalytics);
-router.get("/analytics/income", AnalyticsController.getIncomeAnalytics);
-router.get("/analytics/loans", AnalyticsController.getLoansAnalytics);
-router.get("/analytics/repayments", AnalyticsController.getRepaymentsAnalytics);
+router.get("/analytic/units/:memberId?", AnalyticsController.getUnitsAnalytics);
+router.get(
+  "/analytics/income/:memberId?",
+  AnalyticsController.getIncomeAnalytics
+);
+router.get(
+  "/analytics/loans/:memberId?",
+  AnalyticsController.getLoansAnalytics
+);
+router.get(
+  "/analytics/repayments/:memberId?",
+  AnalyticsController.getRepaymentsAnalytics
+);
 
 export default router;
