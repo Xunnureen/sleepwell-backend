@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import UserModel, { IUser } from "../models/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Error } from "mongoose";
 
 export class Auth {
   static async login(req: Request, res: Response) {
@@ -44,7 +45,7 @@ export class Auth {
       console.error("Error logging in:", error); // Add detailed logging
       return res
         .status(500)
-        .json({ success: false, message: "Error logging in", error });
+        .json({ success: false, message: "Error logging in", Error });
     }
   }
 }
