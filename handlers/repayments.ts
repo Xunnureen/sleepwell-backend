@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import RepaymentModel from "../models/Repayment";
 import LoanModel from "../models/Loan";
 import UnitModel from "../models/Unit";
+import RepaymentHistory from "../models/Recent.Repayment";
+import { Action } from "../utils/types";
 
 export class Repayment {
   static async create(req: Request, res: Response) {
@@ -53,7 +55,7 @@ export class Repayment {
 
       // Update the loan balance and remaining total units
       loan.loanTaken = newRemainingBalance;
-      loan.remainingTotalUnits += repaymentAmt; // Corrected from -= to += for repayment
+      loan.remainingTotalUnits += repaymentAmt;
       await loan.save();
 
       // Update the total units
@@ -83,6 +85,19 @@ export class Repayment {
         repayment.totalRepayment += repaymentAmt; // Increment totalRepayment
         await repayment.save(); // Save updated repayment
 
+        // Record the repayment update in history
+        await RepaymentHistory.create({
+          loanId,
+          action: Action.UPDATED,
+          memberId,
+          repaymentAmount: repayment.repaymentAmount,
+          balance: repayment.balance,
+          processedBy: memberId,
+          previousRemainingTotalUnits: repayment.previousRemainingTotalUnits,
+          currentRemainingTotalUnits: repayment.currentRemainingTotalUnits,
+          totalRepayment: repayment.totalRepayment,
+        });
+
         return res.status(200).json({
           success: true,
           message: "Repayment updated successfully",
@@ -104,6 +119,19 @@ export class Repayment {
           previousRemainingTotalUnits: unit.totalUnit - repaymentAmt,
           currentRemainingTotalUnits: unit.totalUnit, // Ensure currentRemainingTotalUnits reflects unit.totalUnit
           totalRepayment: repaymentAmt, // Initialize totalRepayment
+        });
+
+        // Record the repayment creation in history
+        await RepaymentHistory.create({
+          loanId,
+          action: Action.CREATED,
+          memberId,
+          repaymentAmount: repayment.repaymentAmount,
+          balance: repayment.balance,
+          processedBy: memberId,
+          previousRemainingTotalUnits: repayment.previousRemainingTotalUnits,
+          currentRemainingTotalUnits: repayment.currentRemainingTotalUnits,
+          totalRepayment: repayment.totalRepayment,
         });
 
         return res.status(201).json({
@@ -225,6 +253,19 @@ export class Repayment {
       repayment.totalRepayment += repaymentAmount; // Increment totalRepayment
       await repayment.save();
 
+      // Record the repayment update in history
+      await RepaymentHistory.create({
+        loanId,
+        action: Action.UPDATED,
+        memberId: processedBy,
+        repaymentAmount: repayment.repaymentAmount,
+        balance: repayment.balance,
+        processedBy,
+        previousRemainingTotalUnits: repayment.previousRemainingTotalUnits,
+        currentRemainingTotalUnits: repayment.currentRemainingTotalUnits,
+        totalRepayment: repayment.totalRepayment,
+      });
+
       return res.status(200).json({
         success: true,
         message: "Repayment updated successfully",
@@ -243,24 +284,20 @@ export class Repayment {
     }
   }
 
-  // Delete the repayment record
-  static async delete(req: Request, res: Response) {
+  // New recentLoans method to fetch loans history
+  static async recentRepayments(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const deleteReypayment = await RepaymentModel.findByIdAndDelete(id);
-
-      if (!deleteReypayment) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Repayment not found" });
-      }
+      const recentRepayment = await RepaymentHistory.find().sort({
+        createdAt: -1,
+      }); //to be populate with memberId .populate("memberId")
 
       return res.status(200).json({
         success: true,
-        message: "Repayment deleted successfully",
+        message: "Recent Repayments actions fetched successfully",
+        data: recentRepayment,
       });
     } catch (error: any) {
-      console.error("Error deleting repayment:", error);
+      console.error("Error fetching recent repayments:", error);
       return res.status(500).json({
         success: false,
         message: "Internal server error",

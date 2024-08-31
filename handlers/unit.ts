@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import UnitModel from "../models/Unit";
+import UnitHistoryModel from "../models/Recent.Units";
 import LoanModel from "../models/Loan";
 import moment from "moment";
+import { Action } from "../utils/types";
 
 const PER_UNIT = 2500;
 
@@ -36,6 +38,16 @@ export class Unit {
         unit.income += unitsNumber * PER_UNIT; // Increment income
         await unit.save();
 
+        // Log the update in UnitHistory
+        await UnitHistoryModel.create({
+          memberId,
+          action: Action.UPDATED,
+          units: unitsNumber,
+          totalUnit: unit.totalUnit,
+          income: unit.income,
+          processedBy: memberId,
+        });
+
         // Update remainingTotalUnits for related loans
         const loans = await LoanModel.find({ unitId: unit._id, memberId });
         for (const loan of loans) {
@@ -57,6 +69,17 @@ export class Unit {
           income: unitsNumber * PER_UNIT, // Initialize income
           processedBy: memberId,
         });
+
+        // Log the creation in UnitHistory
+        await UnitHistoryModel.create({
+          memberId,
+          action: Action.CREATED,
+          units: unitsNumber,
+          totalUnit: newUnit.totalUnit,
+          income: newUnit.income,
+          processedBy: memberId,
+        });
+
         return res.status(201).json({
           success: true,
           message: "Unit created successfully",
@@ -135,6 +158,25 @@ export class Unit {
       });
     } catch (error: any) {
       console.error("Error deleting unit:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+
+  // New recentUnits method to fetch unit history
+  static async recentUnits(req: Request, res: Response) {
+    try {
+      const recentUnits = await UnitHistoryModel.find().sort({ createdAt: -1 }); //to be populate with memberId .populate("memberId")
+
+      return res.status(200).json({
+        success: true,
+        message: "Recent unit actions fetched successfully",
+        data: recentUnits,
+      });
+    } catch (error: any) {
+      console.error("Error fetching recent units:", error);
       return res.status(500).json({
         success: false,
         message: "Internal server error",

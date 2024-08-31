@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import LoanModel from "../models/Loan";
 import UnitModel from "../models/Unit";
+import LoanHistory from "../models/Recent.Loan";
+import { Action } from "../utils/types";
 
 const MIN_TOTAL_UNIT = 2500; // Define the minimum total units required
 
@@ -59,6 +61,19 @@ export class Loan {
         loan.loanTaken += loanAmount; // Increment loanTaken by the new loan amount
         loan.remainingTotalUnits = unit.totalUnit - loan.amount;
         loan.totalLoan += loanAmount; // Increment totalLoan by the new loan amount
+
+        // Log the update in LoanHistory
+        await LoanHistory.create({
+          memberId,
+          action: Action.UPDATED,
+          amount: loanAmount,
+          loanTaken: loan.loanTaken,
+          totalLoan: loan.totalLoan,
+          remainingTotalUnits: loan.remainingTotalUnits,
+          processedBy: memberId,
+        });
+
+        // Set the status after the loan update
         status = {
           success: true,
           message: "Existing loan updated successfully",
@@ -75,6 +90,20 @@ export class Loan {
           loanTaken: loanAmount,
           totalLoan: loanAmount, // Set totalLoan to the new loan amount
         });
+
+        // Log the creation in LoanHistory
+        await LoanHistory.create({
+          unitId,
+          memberId,
+          action: Action.CREATED,
+          amount: loan.amount,
+          processedBy: memberId,
+          remainingTotalUnits: loan.remainingTotalUnits,
+          loanTaken: loan.loanTaken,
+          totalLoan: loan.totalLoan,
+        });
+
+        // Set the status after creating a new loan
         status = {
           success: true,
           message: "Loan granted and created successfully",
@@ -211,6 +240,25 @@ export class Loan {
       });
     } catch (error: any) {
       console.error("Error deleting loan:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+
+  // New recentLoans method to fetch loans history
+  static async recentLoans(req: Request, res: Response) {
+    try {
+      const recentLoans = await LoanHistory.find().sort({ createdAt: -1 }); //to be populate with memberId .populate("memberId")
+
+      return res.status(200).json({
+        success: true,
+        message: "Recent loans actions fetched successfully",
+        data: recentLoans,
+      });
+    } catch (error: any) {
+      console.error("Error fetching recent loans:", error);
       return res.status(500).json({
         success: false,
         message: "Internal server error",

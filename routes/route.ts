@@ -39,6 +39,8 @@ router.put("/user/update-password/:id", User.updateDefaultPassword);
 router.post("/units", Unit.create);
 router.get("/units/:id", Unit.getSingleUnit);
 router.get("/units", Unit.getAllUnits);
+//history of any units made..
+router.get("/recentUnits", Unit.recentUnits);
 //router.put("/units/:id", Unit.updateUnit);
 
 //to be enable in future for now
@@ -49,6 +51,8 @@ router.post("/loan", Loan.create);
 router.get("/loan/:id", Loan.singleLoan);
 router.get("/loans", Loan.getAllLoans);
 router.put("/loan/:id", Loan.updateLoan);
+//history of any loans made ..
+router.get("/recentLoans", Loan.recentLoans);
 
 // fetch user details with phoneNumber for those who dont have smartphone or incase...
 router.get("/phone/:phoneNumber", fetchDetailsByPhone);
@@ -58,6 +62,8 @@ router.post("/repayment", Repayment.create);
 router.get("/repayment/:id", Repayment.getById);
 router.get("/repayments", Repayment.getAll);
 router.put("/repayment/:id", Repayment.update);
+//history of any repayment made...
+router.get("/recentRepayment", Repayment.recentRepayments);
 //for future to be enable
 //router.delete("/repayments/:id", Repayment.delete);
 
