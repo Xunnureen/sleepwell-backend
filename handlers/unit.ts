@@ -168,7 +168,10 @@ export class Unit {
   // New recentUnits method to fetch unit history
   static async recentUnits(req: Request, res: Response) {
     try {
-      const recentUnits = await UnitHistoryModel.find().sort({ createdAt: -1 }); //to be populate with memberId .populate("memberId")
+      const recentUnits = await UnitHistoryModel.find()
+        .populate("memberId")
+        .populate("processedBy")
+        .sort({ createdAt: -1 }); // to be populated with memberId .populate("memberId")
 
       return res.status(200).json({
         success: true,
