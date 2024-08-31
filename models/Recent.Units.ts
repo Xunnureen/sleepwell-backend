@@ -16,7 +16,7 @@ const UnitHistorySchema = new Schema<UnitHistory>(
   {
     memberId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Member",
+      ref: "User",
       required: true,
     },
     action: { type: String, enum: Object.values(Action), required: false },
@@ -25,7 +25,7 @@ const UnitHistorySchema = new Schema<UnitHistory>(
     income: { type: Number, required: true },
     processedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Member",
+      ref: "User",
       required: true,
     },
   },

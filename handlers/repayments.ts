@@ -287,9 +287,12 @@ export class Repayment {
   // New recentLoans method to fetch loans history
   static async recentRepayments(req: Request, res: Response) {
     try {
-      const recentRepayment = await RepaymentHistory.find().sort({
-        createdAt: -1,
-      }); //to be populate with memberId .populate("memberId")
+      const recentRepayment = await RepaymentHistory.find()
+        .populate("memberId")
+        .populate("processedBy")
+        .sort({
+          createdAt: -1,
+        }); //to be populate with memberId .populate("memberId")
 
       return res.status(200).json({
         success: true,

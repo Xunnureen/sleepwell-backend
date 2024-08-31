@@ -250,7 +250,10 @@ export class Loan {
   // New recentLoans method to fetch loans history
   static async recentLoans(req: Request, res: Response) {
     try {
-      const recentLoans = await LoanHistory.find().sort({ createdAt: -1 }); //to be populate with memberId .populate("memberId")
+      const recentLoans = await LoanHistory.find()
+        .populate("memberId")
+        .populate("processedBy")
+        .sort({ createdAt: -1 }); //to be populate with memberId .populate("memberId")
 
       return res.status(200).json({
         success: true,
