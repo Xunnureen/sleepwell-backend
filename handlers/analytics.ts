@@ -94,7 +94,7 @@ export class AnalyticsController {
       {
         $group: {
           _id: null,
-          monthlyTotalIncome: { $sum: "$income" },
+          monthlyTotalUnit: { $sum: "$totalUnit" },
         },
       },
     ];
@@ -109,7 +109,7 @@ export class AnalyticsController {
       {
         $group: {
           _id: null,
-          overallTotalIncome: { $sum: "$income" },
+          overallTotalUnit: { $sum: "$totalUnit" },
         },
       },
     ];
@@ -122,8 +122,8 @@ export class AnalyticsController {
         success: true,
         message: "Monthly and Overall Income analytics retrieved successfully",
         data: {
-          monthlyTotalIncome: monthlyResult?.monthlyTotalIncome || 0,
-          overallTotalIncome: overallResult?.overallTotalIncome || 0,
+          monthlyTotalUnit: monthlyResult?.monthlyTotalUnit || 0,
+          overallTotalUnit: overallResult?.overallTotalUnit || 0,
         },
       });
     } catch (error: any) {
