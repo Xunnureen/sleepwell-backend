@@ -19,10 +19,20 @@ export class AnalyticsController {
     const monthlyPipeline = [
       {
         $match: {
-          createdAt: {
-            $gte: new Date(currentYear, currentMonth, 1),
-            $lt: new Date(currentYear, currentMonth + 1, 1),
-          },
+          $or: [
+            {
+              createdAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+            {
+              updatedAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+          ],
           ...memberIdFilter, // Filter by memberId if provided
         },
       },
@@ -84,10 +94,20 @@ export class AnalyticsController {
     const monthlyPipeline = [
       {
         $match: {
-          createdAt: {
-            $gte: new Date(currentYear, currentMonth, 1),
-            $lt: new Date(currentYear, currentMonth + 1, 1),
-          },
+          $or: [
+            {
+              createdAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+            {
+              updatedAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+          ],
           ...memberIdFilter, // Filter by memberId if provided
         },
       },
@@ -149,10 +169,20 @@ export class AnalyticsController {
     const monthlyPipeline = [
       {
         $match: {
-          createdAt: {
-            $gte: new Date(currentYear, currentMonth, 1),
-            $lt: new Date(currentYear, currentMonth + 1, 1),
-          },
+          $or: [
+            {
+              createdAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+            {
+              updatedAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+          ],
           ...memberIdFilter, // Filter by memberId if provided
         },
       },
@@ -214,10 +244,20 @@ export class AnalyticsController {
     const monthlyPipeline = [
       {
         $match: {
-          createdAt: {
-            $gte: new Date(currentYear, currentMonth, 1),
-            $lt: new Date(currentYear, currentMonth + 1, 1),
-          },
+          $or: [
+            {
+              createdAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+            {
+              updatedAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+          ],
           ...memberIdFilter, // Filter by memberId if provided
         },
       },
@@ -250,14 +290,15 @@ export class AnalyticsController {
 
       return res.status(200).json({
         success: true,
-        message: "Repayments analytics retrieved successfully",
+        message:
+          "Monthly and Overall Repayments analytics retrieved successfully",
         data: {
           monthlyTotalRepayments: monthlyResult?.monthlyTotalRepayments || 0,
           overallTotalRepayments: overallResult?.overallTotalRepayments || 0,
         },
       });
     } catch (error: any) {
-      console.error("Error fetching repayments analytics:", error);
+      console.error("Error fetching repayment analytics:", error);
       return res.status(500).json({
         success: false,
         message: "Internal server error",

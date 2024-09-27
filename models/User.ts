@@ -7,8 +7,6 @@ export interface IUser extends Document {
   fullName: string;
   phoneNumber: string;
   email?: string;
-  sp_sj_no: string;
-  ippsNo: string;
   password: string;
   isDefaultPassword: boolean;
   role: RoleName;
@@ -27,9 +25,7 @@ const userSchema = new Schema<IUser>(
       unique: true,
     },
     password: { type: String, required: true, minlength: 8 },
-    email: { type: String, required: false },
-    sp_sj_no: { type: String, required: true },
-    ippsNo: { type: String, required: true, minlength: 8, maxlength: 20 },
+    email: { type: String, lowercase: true, trim: true, required: false },
     isDefaultPassword: { type: Boolean, required: true, default: true },
     role: { type: String, enum: Object.values(RoleName), required: true },
     status: {

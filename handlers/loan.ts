@@ -8,9 +8,9 @@ const MIN_TOTAL_UNIT = 2500; // Define the minimum total units required
 
 export class Loan {
   static async create(req: Request, res: Response) {
-    const { memberId, unitId, amount } = req.body;
+    const { userId, memberId, unitId, amount } = req.body;
 
-    if (!memberId || !unitId || !amount) {
+    if (!userId || !memberId || !unitId || !amount) {
       return res.status(400).json({
         success: false,
         message: "Please provide required fields",
@@ -70,7 +70,7 @@ export class Loan {
           loanTaken: loan.loanTaken,
           totalLoan: loan.totalLoan,
           remainingTotalUnits: loan.remainingTotalUnits,
-          processedBy: memberId,
+          processedBy: userId,
         });
 
         // Set the status after the loan update
@@ -85,7 +85,7 @@ export class Loan {
           unitId,
           memberId,
           amount: loanAmount,
-          processedBy: memberId,
+          processedBy: userId,
           remainingTotalUnits: unit.totalUnit - loanAmount,
           loanTaken: loanAmount,
           totalLoan: loanAmount, // Set totalLoan to the new loan amount
@@ -97,7 +97,7 @@ export class Loan {
           memberId,
           action: Action.CREATED,
           amount: loan.amount,
-          processedBy: memberId,
+          processedBy: userId,
           remainingTotalUnits: loan.remainingTotalUnits,
           loanTaken: loan.loanTaken,
           totalLoan: loan.totalLoan,
@@ -250,11 +250,20 @@ export class Loan {
   // New recentLoans method to fetch loans history
   static async recentLoans(req: Request, res: Response) {
     try {
-      const recentLoans = await LoanHistory.find()
+      const { memberId } = req.params; // Get memberId from route params, if provided
+
+      // Build the query object
+      const query: any = {};
+      if (memberId) {
+        query.memberId = memberId; // If memberId is provided, filter by it
+      }
+      // Fetch the recent loans, optionally filtered by memberId
+      const recentLoans = await LoanHistory.find(query)
         .populate("memberId")
         .populate("processedBy")
-        .sort({ createdAt: -1 }); //to be populate with memberId .populate("memberId")
+        .sort({ createdAt: -1 });
 
+      // Return success response
       return res.status(200).json({
         success: true,
         message: "Recent loans actions fetched successfully",
