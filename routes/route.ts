@@ -48,6 +48,8 @@ router.get("/units/:id", Unit.getSingleUnit);
 router.get("/units", Unit.getAllUnits);
 //history of any units made..
 router.get("/recentUnits/:memberId?", Unit.recentUnits);
+
+// is already there in the system once you add to the existing one
 //router.put("/units/:id", Unit.updateUnit);
 
 //to be enable in future for now
@@ -71,6 +73,7 @@ router.get("/repayments", Repayment.getAll);
 router.put("/repayment/:id", Repayment.update);
 //history of any repayment made...
 router.get("/recentRepayment/:memberId?", Repayment.recentRepayments);
+
 //for future to be enable
 //router.delete("/repayments/:id", Repayment.delete);
 
