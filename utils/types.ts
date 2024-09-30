@@ -13,4 +13,5 @@ export enum StatusEnum {
 export enum Action {
   CREATED = "created",
   UPDATED = "updated",
+  DELETED = "delete",
 }

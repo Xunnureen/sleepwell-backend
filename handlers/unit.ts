@@ -9,9 +9,9 @@ const PER_UNIT = 2500;
 
 export class Unit {
   static async create(req: Request, res: Response) {
-    const { memberId, units } = req.body;
+    const { userId, memberId, units } = req.body;
 
-    if (!memberId || !units) {
+    if (!userId || !memberId || !units) {
       return res.status(400).json({
         success: false,
         message: "Please provide required fields",
@@ -43,9 +43,9 @@ export class Unit {
           memberId,
           action: Action.UPDATED,
           units: unitsNumber,
-          totalUnit: unit.totalUnit,
+          totalUnit: unitsNumber * PER_UNIT,
           income: unit.income,
-          processedBy: memberId,
+          processedBy: userId,
         });
 
         // Update remainingTotalUnits for related loans
@@ -67,7 +67,7 @@ export class Unit {
           units: unitsNumber,
           totalUnit: unitsNumber * PER_UNIT,
           income: unitsNumber * PER_UNIT, // Initialize income
-          processedBy: memberId,
+          processedBy: userId,
         });
 
         // Log the creation in UnitHistory
@@ -77,7 +77,7 @@ export class Unit {
           units: unitsNumber,
           totalUnit: newUnit.totalUnit,
           income: newUnit.income,
-          processedBy: memberId,
+          processedBy: userId,
         });
 
         return res.status(201).json({
@@ -122,7 +122,7 @@ export class Unit {
   // get all units
   static async getAllUnits(req: Request, res: Response) {
     try {
-      const units = await UnitModel.find().populate("processedBy");
+      const units = await UnitModel.find().populate("memberId");
       const unitLength = await UnitModel.countDocuments();
       return res.status(200).json({
         success: true,
@@ -164,14 +164,23 @@ export class Unit {
       });
     }
   }
-
-  // New recentUnits method to fetch unit history
+  
+  //recent unit
   static async recentUnits(req: Request, res: Response) {
     try {
-      const recentUnits = await UnitHistoryModel.find()
+      const { memberId } = req.params; // Get memberId from route params, if provided
+
+      // Build the query object
+      const query: any = {};
+      if (memberId) {
+        query.memberId = memberId; // If memberId is provided, filter by it
+      }
+
+      // Fetch the recent units, optionally filtered by memberId
+      const recentUnits = await UnitHistoryModel.find(query)
         .populate("memberId")
         .populate("processedBy")
-        .sort({ createdAt: -1 }); // to be populated with memberId .populate("memberId")
+        .sort({ createdAt: -1 });
 
       return res.status(200).json({
         success: true,

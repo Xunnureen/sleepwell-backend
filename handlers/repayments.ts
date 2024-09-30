@@ -7,9 +7,9 @@ import { Action } from "../utils/types";
 
 export class Repayment {
   static async create(req: Request, res: Response) {
-    const { memberId, loanId, repaymentAmount } = req.body;
+    const { userId, memberId, loanId, repaymentAmount } = req.body;
 
-    if (!loanId || !repaymentAmount || !memberId) {
+    if (!userId || !loanId || !repaymentAmount || !memberId) {
       return res.status(400).json({
         success: false,
         message: "Please provide required fields",
@@ -65,18 +65,18 @@ export class Repayment {
       // Find existing repayment for the loan and member
       let repayment = await RepaymentModel.findOne({
         loanId,
-        processedBy: memberId,
+        processedBy: userId,
       });
 
       if (repayment) {
         // Check if the loan balance is zero
         if (newRemainingBalance === 0) {
-          // Reset repaymentAmount to zero if the loan balance is zero
-          repayment.repaymentAmount = 0;
+          // Reset repaymentAmount if the loan balance is zero
+          repayment.repaymentAmount = repaymentAmt;
           repayment.balance = 0;
         } else {
           // Update the existing repayment
-          repayment.repaymentAmount += repaymentAmt;
+          repayment.repaymentAmount = repaymentAmt;
           repayment.balance = newRemainingBalance;
           repayment.previousRemainingTotalUnits =
             repayment.currentRemainingTotalUnits;
@@ -90,9 +90,9 @@ export class Repayment {
           loanId,
           action: Action.UPDATED,
           memberId,
-          repaymentAmount: repayment.repaymentAmount,
+          repaymentAmount: repaymentAmt,
           balance: repayment.balance,
-          processedBy: memberId,
+          processedBy: userId,
           previousRemainingTotalUnits: repayment.previousRemainingTotalUnits,
           currentRemainingTotalUnits: repayment.currentRemainingTotalUnits,
           totalRepayment: repayment.totalRepayment,
@@ -105,7 +105,7 @@ export class Repayment {
             repayment,
             remainingBalance: repayment.balance,
             updatedTotalUnits: unit.totalUnit,
-            processedBy: memberId,
+            processedBy: userId,
           },
         });
       } else {
@@ -115,7 +115,7 @@ export class Repayment {
           memberId, // Ensure memberId is set
           repaymentAmount: newRemainingBalance === 0 ? 0 : repaymentAmt, // Reset repaymentAmount for new loan
           balance: newRemainingBalance === 0 ? 0 : newRemainingBalance, // Ensure balance is set to 0 if fully repaid
-          processedBy: memberId,
+          processedBy: userId,
           previousRemainingTotalUnits: unit.totalUnit - repaymentAmt,
           currentRemainingTotalUnits: unit.totalUnit, // Ensure currentRemainingTotalUnits reflects unit.totalUnit
           totalRepayment: repaymentAmt, // Initialize totalRepayment
@@ -128,7 +128,7 @@ export class Repayment {
           memberId,
           repaymentAmount: repayment.repaymentAmount,
           balance: repayment.balance,
-          processedBy: memberId,
+          processedBy: userId,
           previousRemainingTotalUnits: repayment.previousRemainingTotalUnits,
           currentRemainingTotalUnits: repayment.currentRemainingTotalUnits,
           totalRepayment: repayment.totalRepayment,
@@ -257,10 +257,8 @@ export class Repayment {
       await RepaymentHistory.create({
         loanId,
         action: Action.UPDATED,
-        memberId: processedBy,
         repaymentAmount: repayment.repaymentAmount,
         balance: repayment.balance,
-        processedBy,
         previousRemainingTotalUnits: repayment.previousRemainingTotalUnits,
         currentRemainingTotalUnits: repayment.currentRemainingTotalUnits,
         totalRepayment: repayment.totalRepayment,
@@ -287,13 +285,21 @@ export class Repayment {
   // New recentLoans method to fetch loans history
   static async recentRepayments(req: Request, res: Response) {
     try {
-      const recentRepayment = await RepaymentHistory.find()
+      const { memberId } = req.params; // Get memberId from route params, if provided
+
+      // Build the query object
+      const query: any = {};
+      if (memberId) {
+        query.memberId = memberId; // If memberId is provided, filter by it
+      }
+
+      // Fetch the recent repayments, optionally filtered by memberId
+      const recentRepayment = await RepaymentHistory.find(query)
         .populate("memberId")
         .populate("processedBy")
-        .sort({
-          createdAt: -1,
-        }); //to be populate with memberId .populate("memberId")
+        .sort({ createdAt: -1 });
 
+      // Return success response
       return res.status(200).json({
         success: true,
         message: "Recent Repayments actions fetched successfully",

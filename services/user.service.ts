@@ -7,12 +7,15 @@ export class UserService {
     return user;
   }
 
-  static async createTeamAccount(userId: string, fullName: string, phoneNumber: string, email?:string) {
+  static async createMemberAccount(
+    userId: string,
+    fullName: string,
+    phoneNumber: string,
+    email?: string
+  ) {
     try {
-      
+      const existingUser = await UserModel.findOne({ phoneNumber });
 
-      const existingUser = await UserModel.findOne({phoneNumber});
-      
       if (existingUser) {
         return {
           success: false,
@@ -25,11 +28,11 @@ export class UserService {
         phoneNumber,
         email: email || "",
         password: phoneNumber,
-        role: RoleName.CUSTOMER,
+        role: RoleName.MEMBER,
         createdBy: userId,
       };
 
-      console.log({ userData })
+      //console.log({ userData });
 
       const newUser: IUser = await UserModel.create(userData);
 

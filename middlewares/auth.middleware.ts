@@ -27,9 +27,9 @@ export const authMiddleware = (
     const decodedToken = jwt.verify(
       token,
       process.env.JWT_SECRET as string
-    ) as { memberId: string }; // Add type annotation for decodedToken
+    ) as { userId: string }; // Add type annotation for decodedToken
 
-    req.userId = decodedToken.memberId; // Add userId directly to the request object
+    req.userId = decodedToken.userId; // Add userId directly to the request object
 
     next();
   } catch (error) {

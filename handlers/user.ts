@@ -6,10 +6,9 @@ import bcrypt from "bcrypt";
 export class User {
   // Add/create new user
   static async create(req: Request, res: Response) {
-    const { userId, fullName, phoneNumber, email, sp_sj_no, ippsNo, role } =
-      req.body;
+    const { userId, fullName, phoneNumber, email, role } = req.body;
 
-    if (!userId || !fullName || !phoneNumber || !sp_sj_no || !ippsNo || !role) {
+    if (!userId || !fullName || !phoneNumber || !role) {
       return res.status(400).json({
         success: false,
         message: "Please provide all required fields",
@@ -31,8 +30,6 @@ export class User {
         fullName,
         phoneNumber,
         email,
-        sp_sj_no,
-        ippsNo,
         password: phoneNumber,
         role,
         createdBy: userId,
@@ -119,7 +116,7 @@ export class User {
   static async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { fullName, sp_sj_no, ippsNo, email } = req.body;
+      const { fullName, email } = req.body;
 
       const updatedUser = await UserModel.findByIdAndUpdate(id, req.body, {
         new: true,
