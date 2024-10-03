@@ -10,7 +10,7 @@ interface Unit extends Document {
 
 const UnitSchema = new Schema<Unit>(
   {
-    memberId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    memberId: { type: Schema.Types.ObjectId, ref: "Member", required: true },
     units: { type: Number, required: true },
     totalUnit: { type: Number, required: true },
     income: { type: Number, default: 0 },
