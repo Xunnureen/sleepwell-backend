@@ -24,7 +24,7 @@ const RepaymentHistorySchema: Schema = new Schema(
     memberId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "User",
+      ref: "Member",
     },
     repaymentAmount: {
       type: Number,

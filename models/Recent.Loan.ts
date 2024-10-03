@@ -13,7 +13,7 @@ export interface ILoanHistory extends Document {
 
 const LoanHistorySchema: Schema = new Schema(
   {
-    memberId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    memberId: { type: Schema.Types.ObjectId, ref: "Member", required: true },
     action: { type: String, enum: Object.values(Action), required: true },
     amount: { type: Number, required: true },
     loanTaken: { type: Number, required: true },

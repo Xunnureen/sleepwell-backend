@@ -16,7 +16,7 @@ const UnitHistorySchema = new Schema<UnitHistory>(
   {
     memberId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Member",
       required: true,
     },
     action: { type: String, enum: Object.values(Action), required: false },

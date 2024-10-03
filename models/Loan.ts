@@ -13,7 +13,7 @@ export interface ILoan extends Document {
 const LoanSchema: Schema = new Schema(
   {
     unitId: { type: Schema.Types.ObjectId, ref: "Unit", required: true },
-    memberId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    memberId: { type: Schema.Types.ObjectId, ref: "Member", required: true },
     amount: { type: Number, required: true },
     remainingTotalUnits: { type: Number, required: true },
     processedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },

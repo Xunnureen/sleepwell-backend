@@ -48,7 +48,7 @@ export class Member {
         createdBy: userId,
       };
 
-      // Create an account for the team
+      // Create an account for member
       const accountCreationResponse = await UserService.createMemberAccount(
         userId,
         memberName,
