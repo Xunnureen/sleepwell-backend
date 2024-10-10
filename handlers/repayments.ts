@@ -182,7 +182,9 @@ export class Repayment {
   // get all repayments
   static async getAll(req: Request, res: Response) {
     try {
-      const repayments = await RepaymentModel.find().populate("memberId");
+      const repayments = await RepaymentModel.find()
+        .populate("memberId")
+        .populate("processedBy");
       return res.status(200).json({
         success: true,
         data: repayments,

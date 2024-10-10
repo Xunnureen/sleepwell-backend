@@ -154,6 +154,7 @@ export class Loan {
     try {
       const loans = await LoanModel.find()
         .populate("unitId")
+        .populate("memberId")
         .populate("processedBy");
       const length = await LoanModel.countDocuments();
 
