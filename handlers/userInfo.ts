@@ -1,23 +1,23 @@
 import { Request, Response } from "express";
-import UserModel, { IUser } from "../models/User";
 import UnitModel from "../models/Unit";
 import LoanModel from "../models/Loan";
 import RepaymentModel from "../models/Repayment";
+import MemberModel from "../models/Members";
 
 const fetchDetailsByPhone = async (req: Request, res: Response) => {
   const { phoneNumber } = req.params;
 
   try {
-    // Find user by phone number
-    const user = await UserModel.findOne({ phoneNumber });
-    if (!user) {
+    // Find member by phone number
+    const member = await MemberModel.findOne({ phoneNumber });
+    if (!member) {
       return res
         .status(404)
-        .json({ message: `No User exist with such ${phoneNumber}` });
+        .json({ message: `No member exist with such ${phoneNumber}` });
     }
 
-    // Find units by user ID
-    const units = await UnitModel.find({ memberId: user._id });
+    // Find units by member ID
+    const units = await UnitModel.find({ memberId: member._id });
 
     // Find loans by unit IDs
     const loans = await LoanModel.find({
@@ -30,7 +30,7 @@ const fetchDetailsByPhone = async (req: Request, res: Response) => {
     });
 
     res.status(200).json({
-      user,
+      member,
       units,
       loans,
       repayments,

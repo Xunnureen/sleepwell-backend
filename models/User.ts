@@ -12,6 +12,7 @@ export interface IUser extends Document {
   role: RoleName;
   status: StatusEnum;
   createdBy: Types.ObjectId;
+  memberId: Types.ObjectId;
 }
 
 const userSchema = new Schema<IUser>(
@@ -33,6 +34,7 @@ const userSchema = new Schema<IUser>(
       enum: Object.values(StatusEnum),
       default: StatusEnum.ACTIVE,
     },
+    memberId: { type: Schema.Types.ObjectId, ref: "Member", required: true },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
   {
