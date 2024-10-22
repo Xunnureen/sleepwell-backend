@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import MemberModel, { IMember } from "../models/Members";
-import { UserService } from "../services/user.service";
+//import { UserService } from "../services/user.service";
 import bcrypt from "bcrypt";
 
 // Member class
@@ -49,11 +49,12 @@ export class Member {
       };
 
       // Create an account for member
-      const accountCreationResponse = await UserService.createMemberAccount(
+      /*const accountCreationResponse = await UserService.createMemberAccount(
+        memberId,
         userId,
         memberName,
-        phoneNumber,
-        email
+        phoneNumber
+        //email,
       );
 
       if (!accountCreationResponse.success) {
@@ -62,7 +63,7 @@ export class Member {
           message: "Member account creation failed",
           error: accountCreationResponse.message,
         });
-      }
+      }*/
 
       const length = await MemberModel.countDocuments();
       const newMember: IMember = await MemberModel.create(memberData);
