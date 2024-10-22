@@ -23,7 +23,7 @@ router.get("/health", (req: Request, res: Response) => {
 router.post("/auth", Auth.login);
 
 // Apply authMiddleware to all routes defined after this line
-router.use(authMiddleware);
+//router.use(authMiddleware);
 
 // Routes for the Member controller
 router.post("/member", Member.create); // Add/create new member
