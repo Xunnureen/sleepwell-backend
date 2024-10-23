@@ -34,7 +34,7 @@ export class Auth {
         const token = jwt.sign(
           { _id: user._id, role: user.role },
           process.env.JWT_SECRET as string,
-          { expiresIn: "1d" }
+          { expiresIn: "5m" }
         );
 
         /*const data = {
@@ -57,7 +57,7 @@ export class Auth {
         const token = jwt.sign(
           { _id: member._id, role: "member" }, // Assuming role is 'member'
           process.env.JWT_SECRET as string,
-          { expiresIn: "1d" }
+          { expiresIn: "5m" }
         );
 
         /*const data = {
