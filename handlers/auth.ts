@@ -32,9 +32,13 @@ export class Auth {
         }
 
         const token = jwt.sign(
-          { _id: user._id, role: user.role },
+          {
+            _id: user._id,
+            role: user.role,
+            isDefaultPassword: user.isDefaultPassword,
+          },
           process.env.JWT_SECRET as string,
-          { expiresIn: "5m" }
+          { expiresIn: "1d" }
         );
 
         /*const data = {
@@ -55,9 +59,13 @@ export class Auth {
         }
 
         const token = jwt.sign(
-          { _id: member._id, role: "member" }, // Assuming role is 'member'
+          {
+            _id: member._id,
+            role: "member",
+            isDefaultPassword: member.isDefaultPassword,
+          },
           process.env.JWT_SECRET as string,
-          { expiresIn: "5m" }
+          { expiresIn: "1d" }
         );
 
         /*const data = {

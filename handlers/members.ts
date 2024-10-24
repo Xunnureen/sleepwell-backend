@@ -171,6 +171,75 @@ export class Member {
     }
   }
 
+  // Update default password for a member
+  static async updateDefaultPassword(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { password, newPassword } = req.body;
+
+      const member: IMember | null = await MemberModel.findById(id);
+
+      if (!member) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Member not found" });
+      }
+
+      // Check if the member has already updated their password
+      if (!member.isDefaultPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Password has already been updated",
+        });
+      }
+
+      // Verify the current password
+      const isMatch = await bcrypt.compare(password, member.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Current password is incorrect" });
+      }
+
+      if (password === newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "New password cannot be the same as the old password",
+        });
+      }
+
+      if (newPassword === member.phoneNumber) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Oops! Your new password cannot be the same as your phone number. Please choose a different password.",
+        });
+      }
+
+      // Hash the new password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update password and set isDefaultPassword to false
+      member.password = hashedPassword;
+      member.isDefaultPassword = false;
+
+      const updatedMember = await member.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Password updated successfully",
+        data: updatedMember,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: "Error updating member password",
+        error: error.message,
+      });
+    }
+  }
+
   // Delete a member by ID
   static async deleteMember(req: Request, res: Response) {
     try {

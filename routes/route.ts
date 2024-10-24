@@ -23,7 +23,7 @@ router.get("/health", (req: Request, res: Response) => {
 router.post("/auth", Auth.login);
 
 // Apply authMiddleware to all routes defined after this line
-router.use(authMiddleware);
+//router.use(authMiddleware);
 
 // Routes for the Member controller
 router.post("/member", Member.create); // Add/create new member
@@ -48,6 +48,9 @@ router.get("/units/:id", Unit.getSingleUnit);
 router.get("/units", Unit.getAllUnits);
 //history of any units made..
 router.get("/recentUnits/:memberId?", Unit.recentUnits);
+
+// updating member default password.
+router.put("/member/update-password/:id", Member.updateDefaultPassword);
 
 // is already there in the system once you add to the existing one
 //router.put("/units/:id", Unit.updateUnit);
