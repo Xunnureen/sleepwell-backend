@@ -189,7 +189,7 @@ export class AnalyticsController {
       {
         $group: {
           _id: null,
-          monthlyTotalLoans: { $sum: "$totalLoan" },
+          monthlyTotalLoans: { $sum: "$loanTaken" },
         },
       },
     ];
@@ -204,7 +204,7 @@ export class AnalyticsController {
       {
         $group: {
           _id: null,
-          overallTotalLoans: { $sum: "$totalLoan" },
+          overallTotalLoans: { $sum: "$loanTaken" },
         },
       },
     ];
