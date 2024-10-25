@@ -51,7 +51,7 @@ export class Auth {
           .json({ success: true, message: "User login successful", token });
       } else if (member) {
         // Validate member password
-        if (!(await member.comparePassword(password))) {
+        if (!(await bcrypt.compare(password, member.password))) {
           return res.status(401).json({
             success: false,
             message: "Invalid credentials",
