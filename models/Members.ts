@@ -16,7 +16,7 @@ export interface IMember extends Document {
   createdBy: Types.ObjectId;
 
   // Add comparePassword method to the interface
-  comparePassword(candidatePassword: string): Promise<boolean>;
+  //comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const memberSchema = new Schema<IMember>(
@@ -60,10 +60,10 @@ memberSchema.pre<IMember>("save", async function (next) {
 });
 
 memberSchema.methods.comparePassword = async function (
-  memberPassword: string
+  userPassword: string
 ): Promise<boolean> {
   try {
-    return await bcrypt.compare(memberPassword, this.password);
+    return await bcrypt.compare(userPassword, this.password);
   } catch (error) {
     throw error;
   }
