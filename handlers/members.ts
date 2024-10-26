@@ -171,7 +171,7 @@ export class Member {
     }
   }
 
-  // Update default password for a member
+  // Update default password
   static async updateDefaultPassword(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -185,7 +185,7 @@ export class Member {
           .json({ success: false, message: "Member not found" });
       }
 
-      // Check if the member has already updated their password
+      // Check if member has already updated password
       if (!member.isDefaultPassword) {
         return res.status(400).json({
           success: false,
@@ -195,12 +195,13 @@ export class Member {
 
       // Verify the current password
       const isMatch = await bcrypt.compare(password, member.password);
+
       if (!isMatch) {
         return res
           .status(400)
           .json({ success: false, message: "Current password is incorrect" });
       }
-
+      //console.log({ newPassword });
       if (password === newPassword) {
         return res.status(400).json({
           success: false,
@@ -216,12 +217,10 @@ export class Member {
         });
       }
 
-      // Hash the new password
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+      // const saltRounds = 10;
+      // const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-      // Update password and set isDefaultPassword to false
-      member.password = hashedPassword;
+      member.password = newPassword;
       member.isDefaultPassword = false;
 
       const updatedMember = await member.save();
@@ -234,7 +233,7 @@ export class Member {
     } catch (error: any) {
       return res.status(500).json({
         success: false,
-        message: "Error updating member password",
+        message: "Error updating user password",
         error: error.message,
       });
     }
