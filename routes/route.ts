@@ -8,6 +8,7 @@ import fetchDetailsByPhone from "../handlers/userInfo";
 import { Repayment } from "../handlers/repayments";
 import { AnalyticsController } from "../handlers/analytics";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import LoginRateLimiter from "../middlewares/Rate.Limit";
 
 const router = express.Router();
 
@@ -20,10 +21,10 @@ router.get("/health", (req: Request, res: Response) => {
 });
 
 //sign in user route
-router.post("/auth", Auth.login);
+router.post("/auth", LoginRateLimiter, Auth.login);
 
 // Apply authMiddleware to all routes defined after this line
-router.use(authMiddleware);
+//router.use(authMiddleware);
 
 // Routes for the Member controller
 router.post("/member", Member.create); // Add/create new member
