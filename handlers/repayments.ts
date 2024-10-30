@@ -64,24 +64,17 @@ export class Repayment {
 
       // Find existing repayment for the loan and member
       let repayment = await RepaymentModel.findOne({
-        loanId,
-        processedBy: userId,
+        memberId, // Only one repayment per memberId
+        loanId, // Optionally, check against loanId as well
       });
 
       if (repayment) {
-        // Check if the loan balance is zero
-        if (newRemainingBalance === 0) {
-          // Reset repaymentAmount if the loan balance is zero
-          repayment.repaymentAmount = repaymentAmt;
-          repayment.balance = 0;
-        } else {
-          // Update the existing repayment
-          repayment.repaymentAmount = repaymentAmt;
-          repayment.balance = newRemainingBalance;
-          repayment.previousRemainingTotalUnits =
-            repayment.currentRemainingTotalUnits;
-        }
-        repayment.currentRemainingTotalUnits = unit.totalUnit; // Ensure currentRemainingTotalUnits reflects unit.totalUnit
+        // Update existing repayment
+        repayment.repaymentAmount = repaymentAmt; // Increment repayment amount
+        repayment.balance = newRemainingBalance; // Update balance
+        repayment.previousRemainingTotalUnits =
+          repayment.currentRemainingTotalUnits; // Store previous remaining total units
+        repayment.currentRemainingTotalUnits = unit.totalUnit; // Update current remaining total units
         repayment.totalRepayment += repaymentAmt; // Increment totalRepayment
         await repayment.save(); // Save updated repayment
 
@@ -113,7 +106,7 @@ export class Repayment {
         repayment = await RepaymentModel.create({
           loanId,
           memberId, // Ensure memberId is set
-          repaymentAmount: newRemainingBalance === 0 ? 0 : repaymentAmt, // Reset repaymentAmount for new loan
+          repaymentAmount: newRemainingBalance === 0 ? 0 : repaymentAmt, // Reset repaymentAmount if fully repaid
           balance: newRemainingBalance === 0 ? 0 : newRemainingBalance, // Ensure balance is set to 0 if fully repaid
           processedBy: userId,
           previousRemainingTotalUnits: unit.totalUnit - repaymentAmt,

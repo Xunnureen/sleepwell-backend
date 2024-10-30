@@ -1,8 +1,14 @@
-import { Request, Response } from "express";
+import express, { Request, Response } from "express";
 import UserModel, { IUser } from "../models/User";
+import MemberModel, { IMember } from "../models/Members";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import MemberModel, { IMember } from "../models/Members";
+import loginRateLimiter from "../middlewares/Rate.Limit"; // Import rate limiter
+
+const router = express.Router();
+
+// Apply login rate limiter to the router
+router.use(loginRateLimiter);
 
 export class Auth {
   static async login(req: Request, res: Response) {
@@ -11,6 +17,7 @@ export class Auth {
     let member: IMember | null = null;
 
     try {
+      // Validate input
       if (!phoneNumber || !password) {
         return res.status(400).json({
           success: false,
@@ -18,7 +25,7 @@ export class Auth {
         });
       }
 
-      // Try to find the user by phoneNumber in both User and Member collections
+      // Search for user or member by phone number
       user = await UserModel.findOne({ phoneNumber });
       member = await MemberModel.findOne({ phoneNumber });
 
@@ -31,6 +38,7 @@ export class Auth {
           });
         }
 
+        // Generate JWT for user
         const token = jwt.sign(
           {
             _id: user._id,
@@ -40,11 +48,6 @@ export class Auth {
           process.env.JWT_SECRET as string,
           { expiresIn: "1d" }
         );
-
-        /*const data = {
-          ...user.toObject(),
-          token,
-        };*/
 
         return res
           .status(200)
@@ -58,6 +61,7 @@ export class Auth {
           });
         }
 
+        // Generate JWT for member
         const token = jwt.sign(
           {
             _id: member._id,
@@ -68,16 +72,10 @@ export class Auth {
           { expiresIn: "1d" }
         );
 
-        /*const data = {
-          ...member.toObject(),
-          token,
-        };*/
-
         return res
           .status(200)
           .json({ success: true, message: "Member login successful", token });
       } else {
-        // If neither user nor member is found, return invalid credentials
         return res.status(401).json({
           success: false,
           message: "Invalid credentials",
@@ -91,3 +89,5 @@ export class Auth {
     }
   }
 }
+
+export default router;
