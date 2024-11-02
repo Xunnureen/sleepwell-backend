@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import UserModel, { IUser } from "../models/User";
+import MemberModel from "../models/Members";
+import { RoleName } from "../utils/types";
 import bcrypt from "bcrypt";
 
 //User
@@ -253,6 +255,72 @@ export class User {
       return res
         .status(500)
         .json({ success: false, message: "Error logging out", error });
+    }
+  }
+
+  /// Reset Password - Only Admin can reset a Member's password
+  static async forgotPassword(req: Request, res: Response) {
+    try {
+      const { userId, memberId } = req.body;
+
+      // Ensure required fields are provided
+      if (!userId || !memberId) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide both userId and memberId",
+        });
+      }
+
+      // Check if the requesting user is an Admin
+      const adminUser = await UserModel.findById(userId);
+      if (!adminUser || adminUser.role !== RoleName.ADMIN) {
+        return res.status(403).json({
+          success: false,
+          message: "Only Admins are authorized to reset passwords",
+        });
+      }
+
+      // Check if the Member exists
+      const member = await MemberModel.findById(memberId);
+      if (!member) {
+        return res.status(404).json({
+          success: false,
+          message: "Member not found",
+        });
+      }
+
+      if (member.isDefaultPassword) {
+        return res.status(200).json({
+          success: false,
+          message: "Password is already reset thank you!!.",
+        });
+      }
+
+      // Set the new password to the Member's phone number
+      const newPassword = member.phoneNumber;
+
+      //hashed the phoneNumber
+      const saltRounds = 10;
+      member.password = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update the member's password and set isDefaultPassword to true
+      member.password = newPassword;
+      member.isDefaultPassword = true;
+
+      const reset = await member.save(); // Ensure the member is saved after updating
+
+      return res.status(200).json({
+        success: true,
+        message: "Member's password has been reset to their phone number",
+        data: reset,
+      });
+    } catch (error: any) {
+      console.error("Error in forgot password: ", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
     }
   }
 }

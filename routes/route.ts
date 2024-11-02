@@ -34,6 +34,8 @@ router.patch("/member/:id", Member.updateMember); // Update member
 router.delete("/member/:id", Member.deleteMember); // Delete member
 
 //user
+// Route for Admin to reset a Member's password
+router.post("/user/reset-password", User.forgotPassword);
 router.post("/user", User.create);
 router.get("/users", User.getAllUsers);
 router.get("/user/:id", User.singleUser);
