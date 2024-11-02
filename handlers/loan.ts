@@ -35,21 +35,8 @@ export class Loan {
         });
       }
 
-      // Check if the loan amount is greater than the total units
-      if (loanAmount > unit.totalUnit) {
-        return res.status(400).json({
-          success: false,
-          message: `Loan amount cannot be greater than total units`,
-        });
-      }
-
-      // Check if the total units meet the required threshold
-      if (unit.totalUnit < MIN_TOTAL_UNIT) {
-        return res.status(400).json({
-          success: false,
-          message: `Total units must be at least ${MIN_TOTAL_UNIT} to create a loan`,
-        });
-      }
+      // Removed the restriction where loan amount couldn't exceed total units.
+      // Now, the loan amount can be greater than the total units, allowing a negative balance.
 
       // Find existing loan for the unit and member
       let loan = await LoanModel.findOne({ unitId, memberId });
@@ -86,7 +73,7 @@ export class Loan {
           memberId,
           amount: loanAmount,
           processedBy: userId,
-          remainingTotalUnits: unit.totalUnit - loanAmount,
+          remainingTotalUnits: unit.totalUnit - loanAmount, // Allowing totalUnit to go negative if loanAmount exceeds it
           loanTaken: loanAmount,
           totalLoan: loanAmount, // Set totalLoan to the new loan amount
         });
@@ -111,8 +98,8 @@ export class Loan {
         };
       }
 
-      // Deduct the loan amount from the total units
-      unit.totalUnit -= loanAmount;
+      // Deduct the loan amount from the total units (this could result in a negative balance)
+      unit.totalUnit -= loanAmount; // Total units may now reflect a negative balance
       await unit.save();
       await loan.save();
 
@@ -230,7 +217,7 @@ export class Loan {
       // Refund the loan amount back to the total units
       const unit = await UnitModel.findById(deletedLoan.unitId);
       if (unit) {
-        unit.totalUnit += deletedLoan.amount;
+        unit.totalUnit += deletedLoan.amount; // This will now also cover negative balances, bringing unit.totalUnit closer to zero
         await unit.save();
       }
 
