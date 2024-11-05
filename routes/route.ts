@@ -24,7 +24,7 @@ router.get("/health", (req: Request, res: Response) => {
 router.post("/auth", LoginRateLimiter, Auth.login);
 
 // Apply authMiddleware to all routes defined after this line
-//router.use(authMiddleware);
+router.use(authMiddleware);
 
 // Routes for the Member controller
 router.post("/member", Member.create); // Add/create new member
@@ -96,6 +96,17 @@ router.get(
 router.get(
   "/analytics/repayments/:memberId?",
   AnalyticsController.getRepaymentsAnalytics
+);
+
+//amount
+router.get(
+  "/analytics/amount/:memberId?",
+  AnalyticsController.getAmountAnalytics
+);
+//balance maybe for future...
+router.get(
+  "/analytics/balance/:memberId?",
+  AnalyticsController.getBalanceAnalytics
 );
 
 export default router;

@@ -305,4 +305,156 @@ export class AnalyticsController {
       });
     }
   }
+
+  // get Monthly and Overall Amount.
+  static async getAmountAnalytics(req: Request, res: Response) {
+    const { memberId } = req.params;
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    let memberIdFilter = {};
+    if (memberId) {
+      memberIdFilter = { memberId: new mongoose.Types.ObjectId(memberId) };
+    }
+
+    // Pipeline to calculate monthly income
+    const monthlyPipeline = [
+      {
+        $match: {
+          $or: [
+            {
+              createdAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+            {
+              updatedAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+          ],
+          ...memberIdFilter, // Filter by memberId if provided
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          monthlyAmount: { $sum: "$income" },
+        },
+      },
+    ];
+
+    // Pipeline to calculate overall income
+    const overallPipeline = [
+      {
+        $match: {
+          ...memberIdFilter, // Filter by memberId if provided
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          overallAmount: { $sum: "$income" },
+        },
+      },
+    ];
+
+    try {
+      const [monthlyResult] = await UnitModel.aggregate(monthlyPipeline);
+      const [overallResult] = await UnitModel.aggregate(overallPipeline);
+
+      return res.status(200).json({
+        success: true,
+        message: "Monthly and Overall amount analytics retrieved successfully",
+        data: {
+          monthlyAmount: monthlyResult?.monthlyAmount || 0,
+          overallAmount: overallResult?.overallAmount || 0,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching amount analytics:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+
+  // get Monthly and Overall Balance.
+  static async getBalanceAnalytics(req: Request, res: Response) {
+    const { memberId } = req.params;
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    let memberIdFilter = {};
+    if (memberId) {
+      memberIdFilter = { memberId: new mongoose.Types.ObjectId(memberId) };
+    }
+
+    // Pipeline to calculate monthly balance
+    const monthlyPipeline = [
+      {
+        $match: {
+          $or: [
+            {
+              createdAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+            {
+              updatedAt: {
+                $gte: new Date(currentYear, currentMonth, 1),
+                $lt: new Date(currentYear, currentMonth + 1, 1),
+              },
+            },
+          ],
+          ...memberIdFilter, // Filter by memberId if provided
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          monthlyBalance: { $sum: "$balance" },
+        },
+      },
+    ];
+
+    // Pipeline to calculate overall balance
+    const overallPipeline = [
+      {
+        $match: {
+          ...memberIdFilter, // Filter by memberId if provided
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          overallBalance: { $sum: "$balance" },
+        },
+      },
+    ];
+
+    try {
+      const [monthlyResult] = await RepaymentModel.aggregate(monthlyPipeline);
+      const [overallResult] = await RepaymentModel.aggregate(overallPipeline);
+
+      return res.status(200).json({
+        success: true,
+        message: "Monthly and Overall Balance analytics retrieved successfully",
+        data: {
+          monthlyBalance: monthlyResult?.monthlyBalance || 0,
+          overallBalance: overallResult?.overallBalance || 0,
+        },
+      });
+    } catch (error: any) {
+      console.error("Error fetching balance  analytics:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
 }
