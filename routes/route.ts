@@ -4,11 +4,11 @@ import { Auth } from "../handlers/auth";
 import { Unit } from "../handlers/unit";
 import { Loan } from "../handlers/loan";
 import { Member } from "../handlers/members";
-import fetchDetailsByPhone from "../handlers/userInfo";
 import { Repayment } from "../handlers/repayments";
 import { AnalyticsController } from "../handlers/analytics";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import LoginRateLimiter from "../middlewares/Rate.Limit";
+import fetchDetailsByIdentityNo from "../handlers/userInfo";
 
 const router = express.Router();
 
@@ -69,8 +69,8 @@ router.put("/loan/:id", Loan.updateLoan);
 //history of any loans made ..
 router.get("/recentLoans/:memberId?", Loan.recentLoans);
 
-// fetch user details with phoneNumber for those who dont have smartphone or incase...
-router.get("/phone/:phoneNumber", fetchDetailsByPhone);
+// fetch user details with staff identity Number for those who dont have access to smartphones.
+router.get("/IdentityNo/:sp_sj_no", fetchDetailsByIdentityNo);
 
 //Repayment
 router.post("/repayment", Repayment.create);

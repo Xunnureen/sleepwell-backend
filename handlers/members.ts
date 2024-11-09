@@ -37,6 +37,16 @@ export class Member {
         });
       }
 
+      // Check if a member with the same sp_sj_no number already exists
+      const existingMembers = await MemberModel.findOne({ sp_sj_no });
+
+      if (existingMembers) {
+        return res.status(400).json({
+          success: false,
+          message: "Member with this sp_sj_no number already exists",
+        });
+      }
+
       const memberData = {
         memberName,
         phoneNumber,

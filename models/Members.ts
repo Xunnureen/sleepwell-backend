@@ -32,7 +32,7 @@ const memberSchema = new Schema<IMember>(
     password: { type: String, required: true, minlength: 8 },
     email: { type: String, lowercase: true, trim: true, required: false },
     isDefaultPassword: { type: Boolean, required: true, default: true },
-    sp_sj_no: { type: String, required: true },
+    sp_sj_no: { type: String, required: true, unique: true },
     ippsNo: { type: String, required: true, minlength: 4, maxlength: 20 },
     status: {
       type: String,

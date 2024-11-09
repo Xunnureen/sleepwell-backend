@@ -4,16 +4,16 @@ import LoanModel from "../models/Loan";
 import RepaymentModel from "../models/Repayment";
 import MemberModel from "../models/Members";
 
-const fetchDetailsByPhone = async (req: Request, res: Response) => {
-  const { phoneNumber } = req.params;
+const fetchDetailsByIdentityNo = async (req: Request, res: Response) => {
+  const { sp_sj_no } = req.params;
 
   try {
     // Find member by phone number
-    const member = await MemberModel.findOne({ phoneNumber });
+    const member = await MemberModel.findOne({ sp_sj_no });
     if (!member) {
       return res
         .status(404)
-        .json({ message: `No member exist with such ${phoneNumber}` });
+        .json({ message: `No member exist with such ${sp_sj_no} ID` });
     }
 
     // Find units by member ID
@@ -41,4 +41,4 @@ const fetchDetailsByPhone = async (req: Request, res: Response) => {
   }
 };
 
-export default fetchDetailsByPhone;
+export default fetchDetailsByIdentityNo;
